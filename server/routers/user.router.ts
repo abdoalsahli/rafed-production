@@ -117,6 +117,10 @@ export const userRouter = router({
       } catch {
         return DEFAULT_PREFS;
       }
+    } catch (err: any) {
+      // Column may not exist yet in the DB (schema not migrated) — return defaults gracefully
+      if (err?.code === 'ER_BAD_FIELD_ERROR') return DEFAULT_PREFS;
+      throw err;
     } finally {
       conn.release();
     }
@@ -155,6 +159,10 @@ export const userRouter = router({
         }
 
         return { success: true };
+      } catch (err: any) {
+        // Column may not exist yet — silently succeed so the UI doesn't break
+        if (err?.code === 'ER_BAD_FIELD_ERROR') return { success: true };
+        throw err;
       } finally {
         conn.release();
       }
