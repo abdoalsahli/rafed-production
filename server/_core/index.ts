@@ -60,7 +60,7 @@ async function startServer() {
   const server = createServer(app);
   // CORS — origin:true reflects the request origin, allowing credentialed requests
   // from any domain. Restrict to the Vercel domain before going live.
-  app.use(cors({ origin: "https://rafed-production.vercel.app", credentials: true }));
+  app.use(cors({ origin: "https://rafed-backend-production-0dc6.up.railway.app", credentials: true }));
   // Health check
   app.get('/health', (_req, res) => { res.json({ status: 'ok' }); });
   // Configure body parser with larger size limit for file uploads
