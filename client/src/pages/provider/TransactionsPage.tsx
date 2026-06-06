@@ -349,10 +349,10 @@ export default function ProviderTransactionsPage() {
                     <TableCell>{txn.distributorName || '—'}</TableCell>
                     <TableCell>{txn.productName     || '—'}</TableCell>
                     <TableCell className="num font-semibold text-[#0b1c30]">
-                      {'د.ل '}{formatCurrency(txn.amount)}
+                      {`د.ل ${formatCurrency(txn.amount)}`}
                     </TableCell>
                     <TableCell className="num font-semibold text-[#0f766e]">
-                      {'د.ل '}{formatCurrency(txn.commissionAmount)}
+                      {`د.ل ${formatCurrency(txn.commissionAmount)}`}
                     </TableCell>
                     <TableCell>
                       <StatusPill status={txn.status} />
