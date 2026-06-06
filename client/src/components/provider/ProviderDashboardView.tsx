@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
+import { formatAmount, formatCount } from '@/lib/numberUtils';
 import { useLocation } from 'wouter';
 import {
   TrendingUp,
@@ -32,7 +33,7 @@ function timeAgo(date: Date | string): string {
     const h = Math.floor(sec / 3600);
     return `منذ ${h} ${h === 1 ? 'ساعة' : h <= 10 ? 'ساعات' : 'ساعة'}`;
   }
-  return d.toLocaleDateString('ar-SA', { day: 'numeric', month: 'short' });
+  return d.toLocaleDateString('ar-LY-u-nu-latn', { day: 'numeric', month: 'short' });
 }
 
 function getInitial(name: string): string {
@@ -146,14 +147,14 @@ export function ProviderDashboardView({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="إجمالي الإيرادات"
-          value={(metrics.totalRevenue ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          value={formatAmount(metrics.totalRevenue ?? 0)}
           unit="د.ل"
           icon={<CreditCard size={20} />}
           iconVariant="teal"
         />
         <StatCard
           title="البطاقات المباعة (اليوم)"
-          value={(metrics.todayCardsSold ?? 0).toLocaleString('en-US')}
+          value={formatCount(metrics.todayCardsSold ?? 0)}
           unit="بطاقة"
           icon={<TrendingUp size={20} />}
           iconVariant="primary"
@@ -247,7 +248,7 @@ export function ProviderDashboardView({
                         <td className="px-5 py-3">
                           <span className="inline-flex items-center gap-1">
                             <span className="num font-semibold text-[#0b1c30]">
-                              {Number(txn.amount).toFixed(2)}
+                              {formatAmount(txn.amount)}
                             </span>
                             <span className="text-xs text-[#444651]">د.ل</span>
                           </span>

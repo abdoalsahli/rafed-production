@@ -4,6 +4,7 @@
  */
 
 import React from "react";
+import { formatAmount } from "@/lib/numberUtils";
 import { Card } from "@/components/ui/card";
 import { Wallet, TrendingUp, CreditCard } from "lucide-react";
 import Decimal from "decimal.js";
@@ -37,7 +38,7 @@ export const BalanceCards: React.FC<BalanceCardsProps> = ({
             <div className="h-8 bg-slate-200 rounded animate-pulse" />
           ) : (
             <p className="num text-3xl font-bold text-slate-900">
-              {'د.ل '}{new Decimal(data.balance || 0).toFixed(2)}
+              {'د.ل '}{formatAmount(new Decimal(data.balance || 0).toNumber())}
             </p>
           )}
           <p className="text-xs text-slate-500 mt-2">Direct account balance</p>
@@ -55,7 +56,7 @@ export const BalanceCards: React.FC<BalanceCardsProps> = ({
             <div className="h-8 bg-slate-200 rounded animate-pulse" />
           ) : (
             <p className="num text-3xl font-bold text-slate-900">
-              {'د.ل '}{new Decimal(data.availableToSpend || 0).toFixed(2)}
+              {'د.ل '}{formatAmount(new Decimal(data.availableToSpend || 0).toNumber())}
             </p>
           )}
           <p className="text-xs text-slate-500 mt-2">Balance + available credit</p>
@@ -74,10 +75,10 @@ export const BalanceCards: React.FC<BalanceCardsProps> = ({
           ) : (
             <>
               <p className="num text-3xl font-bold text-slate-900">
-                {'د.ل '}{new Decimal(data.creditLine || 0).toFixed(2)}
+                {'د.ل '}{formatAmount(new Decimal(data.creditLine || 0).toNumber())}
               </p>
               <p className="text-xs text-slate-500 mt-2">
-                Used: <span className="num">{'د.ل '}{new Decimal(data.usedCredit || 0).toFixed(2)}</span>
+                Used: <span className="num">{'د.ل '}{formatAmount(new Decimal(data.usedCredit || 0).toNumber())}</span>
               </p>
             </>
           )}

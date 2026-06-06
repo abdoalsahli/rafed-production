@@ -1,4 +1,5 @@
 ﻿import React, { useState } from 'react';
+import { formatAmount } from '@/lib/numberUtils';
 import { formatDateOnly } from '@/lib/dateUtils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -113,13 +114,13 @@ export const ConnectedProvidersTable: React.FC<ConnectedProvidersTableProps> = (
               </TableCell>
               <TableCell>
                 <span className="inline-flex items-center gap-1">
-                  <span className="num">{Number(provider.creditLine || 0).toFixed(2)}</span>
+                  <span className="num">{formatAmount(provider.creditLine || 0)}</span>
                   <span className="text-xs text-[#444651]">د.ل</span>
                 </span>
               </TableCell>
               <TableCell>
                 <span className="inline-flex items-center gap-1">
-                  <span className="num text-[#0f766e]">{Number(provider.availableCredit || 0).toFixed(2)}</span>
+                  <span className="num text-[#0f766e]">{formatAmount(provider.availableCredit || 0)}</span>
                   <span className="text-xs text-[#444651]">د.ل</span>
                 </span>
               </TableCell>

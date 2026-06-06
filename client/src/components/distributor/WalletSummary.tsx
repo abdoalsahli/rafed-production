@@ -1,5 +1,6 @@
 ﻿import React from 'react';
 import { formatDateTime } from '@/lib/dateUtils';
+import { formatAmount } from '@/lib/numberUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Wallet, TrendingUp, TrendingDown, AlertCircle } from 'lucide-react';
@@ -60,7 +61,7 @@ export const WalletSummary: React.FC<WalletSummaryProps> = ({
           <div className="text-center py-4">
             <p className="text-sm text-[#444651] mb-2">الرصيد الحالي</p>
             <p className="num text-5xl font-bold text-[#00236f]">
-              {'د.ل '}{wallet.balance.toFixed(2)}
+              {'د.ل '}{formatAmount(wallet.balance)}
             </p>
             <p className="text-xs text-[#444651] mt-2">{wallet.currency}</p>
           </div>
@@ -72,7 +73,7 @@ export const WalletSummary: React.FC<WalletSummaryProps> = ({
               <div>
                 <p className="font-medium text-[#b45309]">رصيد منخفض</p>
                 <p className="text-sm text-[#b45309]">
-                  رصيدك أقل من <span className="num">{'د.ل '}{lowBalanceThreshold.toFixed(2)}</span>
+                  رصيدك أقل من <span className="num">{'د.ل '}{formatAmount(lowBalanceThreshold)}</span>
                 </p>
               </div>
             </div>
@@ -92,14 +93,14 @@ export const WalletSummary: React.FC<WalletSummaryProps> = ({
               <p className="text-xs text-[#444651] mb-1">إجمالي المصروف</p>
               <div className="flex items-center gap-2">
                 <TrendingDown className="h-4 w-4 text-[#b91c1c]" />
-                <p className="num font-medium">{'د.ل '}{wallet.totalSpent.toFixed(2)}</p>
+                <p className="num font-medium">{'د.ل '}{formatAmount(wallet.totalSpent)}</p>
               </div>
             </div>
             <div>
               <p className="text-xs text-[#444651] mb-1">إجمالي المكتسب</p>
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-[#0f766e]" />
-                <p className="num font-medium">{'د.ل '}{wallet.totalEarned.toFixed(2)}</p>
+                <p className="num font-medium">{'د.ل '}{formatAmount(wallet.totalEarned)}</p>
               </div>
             </div>
           </div>

@@ -1,4 +1,5 @@
 ﻿import React, { useState } from 'react';
+import { formatAmount } from '@/lib/numberUtils';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 import { DollarSign, X, Loader2 } from 'lucide-react';
@@ -27,7 +28,7 @@ export function TopUpModal({
   const topUpMutation = trpc.provider.topUpDistributorBalance.useMutation({
     onSuccess: (data) => {
       toast.success(
-        `تم شحن الرصيد بنجاح. الرصيد الجديد: د.ل ${data.newBalance.toFixed(2)}`
+        `تم شحن الرصيد بنجاح. الرصيد الجديد: د.ل ${formatAmount(data.newBalance)}`
       );
       onSuccess();
       onClose();
@@ -101,7 +102,7 @@ export function TopUpModal({
           <div className="flex items-center justify-between p-3 rounded-lg bg-[#f8f9ff] border border-[#e2e8f0]">
             <span className="text-sm text-[#444651]">الرصيد الحالي</span>
             <span className="num text-sm font-semibold text-[#0b1c30]">
-              {'د.ل '}{currentBalance.toFixed(2)}
+              {'د.ل '}{formatAmount(currentBalance)}
             </span>
           </div>
 
@@ -130,7 +131,7 @@ export function TopUpModal({
             )}
             {amount && !amountError && (
               <p className="text-xs text-[#0f766e] num" dir="ltr">
-                الرصيد الجديد سيكون: {'د.ل '}{(currentBalance + parseFloat(amount || '0')).toFixed(2)}
+                الرصيد الجديد سيكون: {'د.ل '}{formatAmount(currentBalance + parseFloat(amount || '0'))}
               </p>
             )}
           </div>

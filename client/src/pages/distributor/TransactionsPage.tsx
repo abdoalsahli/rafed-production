@@ -1,4 +1,5 @@
 ﻿import React, { useState, useMemo, useEffect } from 'react';
+import { formatAmount } from '@/lib/numberUtils';
 import { formatDateTimeShort } from '@/lib/dateUtils';
 import { Search, TrendingUp, AlertCircle, Download, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -182,14 +183,14 @@ export const TransactionsPage: React.FC = () => {
           />
           <StatCard
             title="إجمالي المبلغ"
-            value={totalAmount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            value={formatAmount(totalAmount)}
             unit="د.ل"
             icon={<DollarSign size={20} />}
             iconVariant="teal"
           />
           <StatCard
             title="إجمالي العمولة"
-            value={totalCommission.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            value={formatAmount(totalCommission)}
             unit="د.ل"
             icon={<TrendingUp size={20} />}
             iconVariant="amber"
@@ -304,7 +305,7 @@ export const TransactionsPage: React.FC = () => {
                       <td className="px-6 py-3 text-right">
                         <span className="inline-flex items-center gap-1">
                           <span className="num font-semibold text-[#0b1c30]">
-                            {entry.amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}{entry.type === 'CREDIT' ? '+' : '-'}
+                            {formatAmount(entry.amount)}{entry.type === 'CREDIT' ? '+' : '-'}
                           </span>
                           <span className="text-xs text-[#444651]">د.ل</span>
                         </span>
@@ -312,7 +313,7 @@ export const TransactionsPage: React.FC = () => {
                       <td className="px-6 py-3 text-right">
                         <span className="inline-flex items-center gap-1">
                           <span className="num font-semibold text-[#0b1c30]">
-                            {entry.balanceAfterTransaction.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                            {formatAmount(entry.balanceAfterTransaction)}
                           </span>
                           <span className="text-xs text-[#444651]">د.ل</span>
                         </span>

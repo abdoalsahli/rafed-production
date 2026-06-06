@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import { formatAmount } from '@/lib/numberUtils';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card } from '@/components/ui/card';
 import { AlertCircle, Loader2 } from 'lucide-react';
@@ -100,7 +101,7 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
             <TableRow key={tx.id}>
               <TableCell className="font-mono text-sm num">{tx.id}</TableCell>
               <TableCell className="text-sm text-[#444651]">
-                {typeof tx.date === 'string' ? tx.date : new Date(tx.date).toLocaleString('en-US')}
+                {typeof tx.date === 'string' ? tx.date : new Date(tx.date).toLocaleString('ar-LY-u-nu-latn', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
               </TableCell>
               <TableCell className="text-[#0b1c30]">{tx.provider}</TableCell>
               <TableCell>
@@ -115,7 +116,7 @@ export const TransactionsTable: React.FC<TransactionsTableProps> = ({
                   tx.type === 'credit' ? 'text-[#0f766e]' : 'text-[#0b1c30]'
                 }`}
               >
-                {'د.ل '}{tx.type === 'credit' ? '+' : '-'}{tx.amount.toFixed(2)}
+                {'د.ل '}{tx.type === 'credit' ? '+' : '-'}{formatAmount(tx.amount)}
               </TableCell>
               <TableCell>
                 <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${

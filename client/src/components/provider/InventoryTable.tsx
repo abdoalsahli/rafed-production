@@ -1,4 +1,5 @@
 ﻿import { useState } from 'react';
+import { formatAmount, formatCount } from '@/lib/numberUtils';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import {
@@ -53,15 +54,15 @@ export function InventoryTable({ inventory, isLoading }: InventoryTableProps) {
                 <TableCell>
                   <span className="inline-flex items-center gap-1">
                     <span className="num text-[#0b1c30]">
-                      {typeof item.price === 'string' ? item.price : item.price?.toFixed(2)}
+                      {formatAmount(item.price)}
                     </span>
                     <span className="text-xs text-[#444651]">د.ل</span>
                   </span>
                 </TableCell>
-                <TableCell className="num text-[#0b1c30]">{item.availableCards}</TableCell>
-                <TableCell className="num text-[#0b1c30]">{item.soldCards}</TableCell>
+                <TableCell className="num text-[#0b1c30]">{formatCount(item.availableCards)}</TableCell>
+                <TableCell className="num text-[#0b1c30]">{formatCount(item.soldCards)}</TableCell>
                 <TableCell className="num text-[#0b1c30]">
-                  {item.totalCards || item.availableCards + item.soldCards}
+                  {formatCount(item.totalCards || item.availableCards + item.soldCards)}
                 </TableCell>
                 <TableCell>
                   {item.lowStock ? (

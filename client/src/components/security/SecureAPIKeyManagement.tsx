@@ -141,7 +141,7 @@ export const SecureAPIKeyManagement: React.FC<SecureAPIKeyManagementProps> = ({
                         Inactive
                       </span>
                       <span className="text-sm text-gray-600">
-                        Created {new Intl.DateTimeFormat('en-US', {
+                        أُنشئ {new Intl.DateTimeFormat('ar-LY-u-nu-latn', {
                           month: 'short',
                           day: 'numeric',
                           year: 'numeric',

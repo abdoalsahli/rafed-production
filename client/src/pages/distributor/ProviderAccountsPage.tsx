@@ -1,4 +1,5 @@
 ﻿import React, { useState } from 'react';
+import { formatAmount } from '@/lib/numberUtils';
 import { trpc } from '@/lib/trpc';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { StatCard } from '@/components/ui/StatCard';
@@ -65,21 +66,21 @@ export const ProviderAccountsPage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <StatCard
             title="إجمالي الرصيد"
-            value={summary.totalBalance.toFixed(2)}
+            value={formatAmount(summary.totalBalance)}
             unit="د.ل"
             icon={<DollarSign size={20} />}
             iconVariant="primary"
           />
           <StatCard
             title="الائتمان المستخدم"
-            value={summary.totalUsedCredit.toFixed(2)}
+            value={formatAmount(summary.totalUsedCredit)}
             unit="د.ل"
             icon={<CreditCard size={20} />}
             iconVariant="amber"
           />
           <StatCard
             title="المتاح للإنفاق"
-            value={summary.totalAvailableToSpend.toFixed(2)}
+            value={formatAmount(summary.totalAvailableToSpend)}
             unit="د.ل"
             icon={<TrendingUp size={20} />}
             iconVariant="teal"
@@ -126,20 +127,20 @@ export const ProviderAccountsPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-3 text-right">
                       <span className="inline-flex items-center gap-1">
-                        <span className="num font-semibold text-[#0b1c30]">{account.balance.toFixed(2)}</span>
+                        <span className="num font-semibold text-[#0b1c30]">{formatAmount(account.balance)}</span>
                         <span className="text-xs text-[#444651]">د.ل</span>
                       </span>
                     </td>
                     <td className="px-6 py-3 text-right">
                       <span className="inline-flex items-center gap-1">
-                        <span className="num text-[#444651]">{account.creditLine.toFixed(2)}</span>
+                        <span className="num text-[#444651]">{formatAmount(account.creditLine)}</span>
                         <span className="text-xs text-[#444651]">د.ل</span>
                       </span>
                     </td>
                     <td className="px-6 py-3 text-right">
                       <span className="inline-flex items-center gap-1">
                         <span className={["num font-medium", account.usedCredit > 0 ? 'text-[#b45309]' : 'text-[#444651]'].join(' ')}>
-                          {account.usedCredit.toFixed(2)}
+                          {formatAmount(account.usedCredit)}
                         </span>
                         <span className="text-xs text-[#444651]">د.ل</span>
                       </span>
@@ -147,7 +148,7 @@ export const ProviderAccountsPage: React.FC = () => {
                     <td className="px-6 py-3 text-right">
                       <span className="inline-flex items-center gap-1">
                         <span className={["num font-semibold", account.availableToSpend < 1000 ? 'text-[#b91c1c]' : 'text-[#0f766e]'].join(' ')}>
-                          {account.availableToSpend.toFixed(2)}
+                          {formatAmount(account.availableToSpend)}
                         </span>
                         <span className="text-xs text-[#444651]">د.ل</span>
                       </span>
@@ -199,7 +200,7 @@ export const ProviderAccountsPage: React.FC = () => {
                       <p className="text-xs text-[#444651] font-medium mb-1">{label}</p>
                       <span className="inline-flex items-center gap-1">
                         <span className={["num text-base font-semibold text-[#0b1c30]", color].join(' ')}>
-                          {value.toFixed(2)}
+                          {formatAmount(value)}
                         </span>
                         <span className="text-sm text-[#444651]">د.ل</span>
                       </span>
@@ -212,10 +213,10 @@ export const ProviderAccountsPage: React.FC = () => {
                   <span className="font-medium text-[#0b1c30]">احتساب المتاح: </span>
                   الرصيد + (حد الائتمان - الائتمان المستخدم) ={' '}
                   <span className="num">
-                    {account.balance.toFixed(2)} + ({account.creditLine.toFixed(2)} - {account.usedCredit.toFixed(2)}) ={' '}
+                    {formatAmount(account.balance)} + ({formatAmount(account.creditLine)} - {formatAmount(account.usedCredit)}) ={' '}
                   </span>
                   <span className="inline-flex items-center gap-1">
-                    <span className="num font-semibold text-[#0b1c30]">{account.availableToSpend.toFixed(2)}</span>
+                    <span className="num font-semibold text-[#0b1c30]">{formatAmount(account.availableToSpend)}</span>
                     <span>د.ل</span>
                   </span>
                 </div>

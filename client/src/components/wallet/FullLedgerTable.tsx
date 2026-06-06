@@ -1,4 +1,5 @@
 ﻿import React from 'react';
+import { formatAmount } from '@/lib/numberUtils';
 import { ArrowUpRight, ArrowDownLeft, Gift, RefreshCw } from 'lucide-react';
 
 export type TransactionType = 'credit' | 'debit' | 'commission' | 'refund';
@@ -193,7 +194,7 @@ export function FullLedgerTable({ entries, isLoading = false, onLoadMore }: Full
                 <td className="px-6 py-4 whitespace-nowrap text-right">
                   <span className="inline-flex items-center gap-1">
                     <span className={`num text-sm font-bold ${getAmountColor(entry.type)}`}>
-                      {Math.abs(entry.amount).toLocaleString('en-US')}{entry.amount > 0 ? '+' : '-'}
+                      {formatAmount(Math.abs(entry.amount))}{entry.amount > 0 ? '+' : '-'}
                     </span>
                     <span className="text-xs text-[#444651]">د.ل</span>
                   </span>
@@ -201,7 +202,7 @@ export function FullLedgerTable({ entries, isLoading = false, onLoadMore }: Full
                 <td className="px-6 py-4 whitespace-nowrap text-right">
                   <span className="inline-flex items-center gap-1">
                     <span className="num text-sm font-semibold text-[#0b1c30]">
-                      {entry.balanceAfter.toLocaleString('en-US')}
+                      {formatAmount(entry.balanceAfter)}
                     </span>
                     <span className="text-xs text-[#444651]">د.ل</span>
                   </span>
@@ -237,7 +238,7 @@ export function FullLedgerTable({ entries, isLoading = false, onLoadMore }: Full
                 </div>
               </div>
               <p className={`num text-sm font-bold ${getAmountColor(entry.type)}`}>
-                د.ل {entry.amount > 0 ? '+' : ''}{Math.abs(entry.amount).toLocaleString('en-US')}
+                د.ل {entry.amount > 0 ? '+' : ''}{formatAmount(Math.abs(entry.amount))}
               </p>
             </div>
             <div className="flex items-center justify-between text-xs text-[#444651]">
@@ -246,7 +247,7 @@ export function FullLedgerTable({ entries, isLoading = false, onLoadMore }: Full
             </div>
             <div className="mt-2 pt-2 border-t border-[#e2e8f0]">
               <p className="text-xs text-[#444651]">
-                الرصيد: <span className="num font-semibold text-[#0b1c30]">د.ل {entry.balanceAfter.toLocaleString('en-US')}</span>
+                الرصيد: <span className="num font-semibold text-[#0b1c30]">د.ل {formatAmount(entry.balanceAfter)}</span>
               </p>
             </div>
           </div>

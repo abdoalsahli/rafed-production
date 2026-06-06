@@ -10,14 +10,14 @@ export const SandboxPage: React.FC = () => {
   const baseUrl = window.location.origin;
 
   return (
-    <div dir="ltr" className="p-6 md:p-8 space-y-6 text-left">
+    <div className="p-6 md:p-8 space-y-6">
       <PageHeader
         title="الاختبار والتجربة"
         subtitle="اختبر تكاملك خطوة بخطوة قبل الإطلاق"
       />
 
       {/* No separate sandbox notice */}
-      <Card className="border-[#bfdbfe] bg-[#eff6ff]">
+      <Card dir="ltr" className="border-[#bfdbfe] bg-[#eff6ff] text-left">
         <CardContent className="py-5 flex items-start gap-3">
           <AlertCircle size={20} className="text-[#2563eb] flex-shrink-0 mt-0.5" />
           <div>
@@ -31,7 +31,7 @@ export const SandboxPage: React.FC = () => {
       </Card>
 
       {/* Step 1 – Get credentials */}
-      <Card>
+      <Card dir="ltr" className="text-left">
         <div className="px-6 py-4 border-b border-slate-200">
           <div className="flex items-center gap-2">
             <Key size={20} className="text-slate-700" />
@@ -58,7 +58,7 @@ export const SandboxPage: React.FC = () => {
       </Card>
 
       {/* Step 2 – Discover products */}
-      <Card>
+      <Card dir="ltr" className="text-left">
         <div className="px-6 py-4 border-b border-slate-200">
           <div className="flex items-center gap-2">
             <Code size={20} className="text-slate-700" />
@@ -94,7 +94,7 @@ export const SandboxPage: React.FC = () => {
       </Card>
 
       {/* Step 3 – Make a purchase */}
-      <Card>
+      <Card dir="ltr" className="text-left">
         <div className="px-6 py-4 border-b border-slate-200">
           <div className="flex items-center gap-2">
             <Zap size={20} className="text-slate-700" />
@@ -144,7 +144,7 @@ export const SandboxPage: React.FC = () => {
       </Card>
 
       {/* Test scenarios */}
-      <Card>
+      <Card dir="ltr" className="text-left">
         <div className="px-6 py-4 border-b border-slate-200">
           <div className="flex items-center gap-2">
             <CheckCircle size={20} className="text-slate-700" />
@@ -263,7 +263,7 @@ curl -X POST "${baseUrl}/api/v1/purchases" \\
       </Card>
 
       {/* Best Practices */}
-      <Card>
+      <Card dir="ltr" className="text-left">
         <div className="px-6 py-4 border-b border-slate-200">
           <div className="flex items-center gap-2">
             <BookOpen size={20} className="text-slate-700" />
@@ -301,7 +301,7 @@ curl -X POST "${baseUrl}/api/v1/purchases" \\
       </Card>
 
       {/* Ready for production */}
-      <Card className="border-green-200 bg-green-50">
+      <Card dir="ltr" className="border-green-200 bg-green-50 text-left">
         <CardContent className="py-6 flex items-start gap-4">
           <CheckCircle size={20} className="text-[#0f766e] flex-shrink-0 mt-0.5" />
           <div>

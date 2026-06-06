@@ -1,4 +1,5 @@
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { formatAmount } from '@/lib/numberUtils';
 
 interface WalletSummarySectionProps {
   balance: number;
@@ -21,7 +22,7 @@ export function WalletSummarySection({
         <h2 className="text-sm font-semibold text-gray-600 uppercase tracking-wider mb-2">
           Wallet Balance
         </h2>
-        <p className="num text-4xl font-bold text-gray-900">{'د.ل '}{balance.toLocaleString('en-US')}</p>
+        <p className="num text-4xl font-bold text-gray-900">{'د.ل '}{formatAmount(balance)}</p>
         {lastUpdated && (
           <p className="text-xs text-gray-600 mt-2">
             Last updated: {lastUpdated.toLocaleTimeString()}
@@ -40,7 +41,7 @@ export function WalletSummarySection({
             <TrendingUp className="w-4 h-4 text-green-600" />
           </div>
           <p className="num text-3xl font-bold text-green-600 mb-1">
-            {'د.ل '}{availableToSpend.toLocaleString('en-US')}
+            {'د.ل '}{formatAmount(availableToSpend)}
           </p>
           <p className="text-xs text-gray-600">Balance + Credit Line</p>
         </div>
@@ -53,7 +54,7 @@ export function WalletSummarySection({
             </p>
             <TrendingDown className="w-4 h-4 text-orange-600" />
           </div>
-          <p className="num text-3xl font-bold text-gray-900 mb-1">{'د.ل '}{creditLine.toLocaleString('en-US')}</p>
+          <p className="num text-3xl font-bold text-gray-900 mb-1">{'د.ل '}{formatAmount(creditLine)}</p>
           <p className="text-xs text-gray-600">Total available credit</p>
         </div>
 

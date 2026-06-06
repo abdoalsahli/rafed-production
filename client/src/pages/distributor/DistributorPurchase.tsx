@@ -8,6 +8,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { formatAmount } from '@/lib/numberUtils';
 import { trpc } from '@/lib/trpc';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -404,7 +405,7 @@ export function DistributorPurchase() {
                     />
                     <Stat
                       label="الهامش"
-                      value={`د.ل ${(selectedProduct.face_value - selectedProduct.price).toFixed(2)}`}
+                      value={`د.ل ${formatAmount(selectedProduct.face_value - selectedProduct.price)}`}
                       valueClass="text-[#0f766e]"
                     />
                   </div>
@@ -468,7 +469,7 @@ export function DistributorPurchase() {
                     </div>
                     <div className="flex justify-between font-bold text-base text-[#1e3a8a] pt-2 border-t border-[#bfdbfe]">
                       <span>الإجمالي</span>
-                      <span className="num" dir="ltr">{(selectedProduct.price * quantity).toFixed(2)} {selectedProduct.currency}</span>
+                      <span className="num" dir="ltr">{formatAmount(selectedProduct.price * quantity)} {selectedProduct.currency}</span>
                     </div>
                   </div>
                 )}
@@ -490,7 +491,7 @@ export function DistributorPurchase() {
                     : 'شراء بطاقة'}
                   {selectedProduct && (
                     <span className="mr-2 opacity-75 text-sm font-normal num" dir="ltr">
-                      — {(selectedProduct.price * quantity).toFixed(2)} {selectedProduct.currency}
+                      — {formatAmount(selectedProduct.price * quantity)} {selectedProduct.currency}
                     </span>
                   )}
                 </Button>

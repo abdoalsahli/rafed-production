@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { formatAmount } from '@/lib/numberUtils';
 import { Check, X, Edit2, AlertCircle, Lock } from 'lucide-react';
 
 export interface Distributor {
@@ -171,10 +172,10 @@ export const DistributorManagement: React.FC<DistributorManagementProps> = ({
                     <td className="py-4 px-6 text-right">
                       <div className="flex flex-col items-end">
                         <p className={`num font-semibold ${isHighCredit ? 'text-red-600' : 'text-gray-900'}`}>
-                          {'د.ل '}{distributor.creditLine.toLocaleString('en-US')}
+                          {'د.ل '}{formatAmount(distributor.creditLine)}
                         </p>
                         <p className="num text-xs text-gray-500 mt-1">
-                          {'د.ل '}{distributor.usedCredit.toLocaleString('en-US')} used ({creditUtilization.toFixed(0)}%)
+                          {'د.ل '}{formatAmount(distributor.usedCredit)} used ({creditUtilization.toFixed(0)}%)
                         </p>
                         {isHighCredit && (
                           <div className="flex items-center gap-1 text-red-600 mt-1">
@@ -186,7 +187,7 @@ export const DistributorManagement: React.FC<DistributorManagementProps> = ({
                     </td>
                     <td className="py-4 px-6 text-right">
                       <p className="num font-semibold text-green-600">
-                        {'د.ل '}{distributor.totalSales.toLocaleString('en-US')}
+                        {'د.ل '}{formatAmount(distributor.totalSales)}
                       </p>
                     </td>
                     <td className="py-4 px-6">

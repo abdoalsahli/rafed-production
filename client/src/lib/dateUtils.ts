@@ -1,16 +1,19 @@
 /**
  * Date formatting utilities — all timestamps displayed in GMT+2 (Africa/Cairo).
  * Egypt does not observe DST, so this is a consistent UTC+2 offset year-round.
+ *
+ * Locale: ar-LY-u-nu-latn — Arabic text (Libyan), Western/Latin digits (0-9).
  */
 
-const TZ = 'Africa/Cairo'; // UTC+2, no DST
+const TZ   = 'Africa/Cairo'; // UTC+2, no DST
+const AR   = 'ar-LY-u-nu-latn'; // Arabic labels, Western numerals
 
 /**
- * "Jun 1, 10:30 AM" — used in transaction/event lists where the year is implied.
+ * "1 يون، 10:30 ص" — used in transaction/event lists where the year is implied.
  */
 export function formatDateTimeShort(date: string | Date | null | undefined): string {
   if (!date) return '—';
-  return new Date(date).toLocaleString('en-US', {
+  return new Date(date).toLocaleString(AR, {
     timeZone: TZ,
     month: 'short',
     day: 'numeric',
@@ -20,11 +23,11 @@ export function formatDateTimeShort(date: string | Date | null | undefined): str
 }
 
 /**
- * "Jun 1, 2026, 10:30 AM" — used when the full date + time matters.
+ * "1 يون 2026، 10:30 ص" — used when the full date + time matters.
  */
 export function formatDateTime(date: string | Date | null | undefined): string {
   if (!date) return '—';
-  return new Date(date).toLocaleString('en-US', {
+  return new Date(date).toLocaleString(AR, {
     timeZone: TZ,
     year: 'numeric',
     month: 'short',
@@ -35,11 +38,11 @@ export function formatDateTime(date: string | Date | null | undefined): string {
 }
 
 /**
- * "Jun 1, 2026" — date only, no time.
+ * "1 يون 2026" — date only, no time.
  */
 export function formatDateOnly(date: string | Date | null | undefined): string {
   if (!date) return '—';
-  return new Date(date).toLocaleDateString('en-US', {
+  return new Date(date).toLocaleDateString(AR, {
     timeZone: TZ,
     year: 'numeric',
     month: 'short',
@@ -48,11 +51,11 @@ export function formatDateOnly(date: string | Date | null | undefined): string {
 }
 
 /**
- * "10:30 AM" — time only.
+ * "10:30 ص" — time only.
  */
 export function formatTimeOnly(date: string | Date | null | undefined): string {
   if (!date) return '—';
-  return new Date(date).toLocaleTimeString('en-US', {
+  return new Date(date).toLocaleTimeString(AR, {
     timeZone: TZ,
     hour: '2-digit',
     minute: '2-digit',

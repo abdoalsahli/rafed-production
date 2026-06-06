@@ -12,6 +12,7 @@
 
 import * as React from 'react';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { formatCount } from '@/lib/numberUtils';
 import { cn } from '@/lib/utils';
 
 /* ── Icon-box colour variants ────────────────────────────────────────────── */
@@ -144,7 +145,7 @@ export function StatCard({
             Visual left-to-right: [unit] [number] = e.g. "د.ل 289.00"
           */}
           <span className="num font-bold text-[#0b1c30] leading-tight text-[1.5rem]">
-            {typeof value === 'number' ? value.toLocaleString('en-US') : value}
+            {typeof value === 'number' ? formatCount(value) : value}
           </span>
           {unit && (
             <span className="text-sm font-semibold text-[#444651]">{unit}</span>

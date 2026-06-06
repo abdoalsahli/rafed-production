@@ -107,7 +107,7 @@ export const APIPage: React.FC = () => {
             <p className="text-xs text-[#94a3b8] max-w-xs leading-snug">
               ستظهر هنا إحصائيات الطلبات وسجل الاستدعاءات في تحديث قادم.
               يمكنك في الوقت الحالي متابعة طلباتك عبر نقطة نهاية الحالة
-              <span className="num"> GET /api/v1/purchases/:id</span>.
+              <span dir="ltr" className="num inline-block"> GET /api/v1/purchases/:id</span>.
             </p>
           </div>
         </CardContent>
@@ -128,7 +128,7 @@ export const APIPage: React.FC = () => {
             <p className="text-sm text-[#444651] mb-3">
               كل طلب يتطلب ترويستين — معرّف المفتاح والمفتاح السري:
             </p>
-            <pre className="bg-[#f8f9ff] border border-[#e2e8f0] rounded-lg p-4 overflow-x-auto">
+            <pre dir="ltr" className="bg-[#f8f9ff] border border-[#e2e8f0] rounded-lg p-4 overflow-x-auto text-left">
               <code className="text-xs text-[#444651] num">
 {`X-API-Key: YOUR_KEY_ID
 X-API-Secret: YOUR_SECRET`}
@@ -138,7 +138,7 @@ X-API-Secret: YOUR_SECRET`}
 
           <div>
             <h3 className="font-semibold text-[#0b1c30] mb-2">مثال على طلب شراء</h3>
-            <pre className="bg-[#f8f9ff] border border-[#e2e8f0] rounded-lg p-4 overflow-x-auto">
+            <pre dir="ltr" className="bg-[#f8f9ff] border border-[#e2e8f0] rounded-lg p-4 overflow-x-auto text-left">
               <code className="text-xs text-[#444651] num">
 {`curl -X POST ${window.location.origin}/api/v1/purchases?wait=true \\
   -H "X-API-Key: YOUR_KEY_ID" \\

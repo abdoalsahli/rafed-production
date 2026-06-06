@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { useState } from 'react';
+import { formatAmount, formatCount } from '@/lib/numberUtils';
 import { useLocation } from 'wouter';
 import {
   TrendingUp,
@@ -30,7 +31,7 @@ function timeAgo(date: Date | string): string {
     const h = Math.floor(sec / 3600);
     return `منذ ${h} ${h <= 10 ? 'ساعات' : 'ساعة'}`;
   }
-  return d.toLocaleDateString('ar-SA', { day: 'numeric', month: 'short' });
+  return d.toLocaleDateString('ar-LY-u-nu-latn', { day: 'numeric', month: 'short' });
 }
 
 const AVATAR_COLORS = [
@@ -114,14 +115,14 @@ export const DistributorDashboardView: React.FC<DashboardViewProps> = ({
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="إجمالي الإيرادات"
-          value={(summaryData?.totalAmount ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          value={formatAmount(summaryData?.totalAmount ?? 0)}
           unit="د.ل"
           icon={<TrendingUp size={20} />}
           iconVariant="teal"
         />
         <StatCard
           title="إجمالي العمولات"
-          value={(summaryData?.totalCommission ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          value={formatAmount(summaryData?.totalCommission ?? 0)}
           unit="د.ل"
           icon={<BadgePercent size={20} />}
           iconVariant="amber"
@@ -135,7 +136,7 @@ export const DistributorDashboardView: React.FC<DashboardViewProps> = ({
         />
         <StatCard
           title="إجمالي العمليات"
-          value={total.toLocaleString('en-US')}
+          value={formatCount(total)}
           unit="عملية"
           icon={<Receipt size={20} />}
           iconVariant="primary"
@@ -155,7 +156,7 @@ export const DistributorDashboardView: React.FC<DashboardViewProps> = ({
               {total > 0 && (
                 <p className="text-xs text-[#444651] mt-0.5">
                   إجمالي{' '}
-                  <span className="num font-semibold">{total.toLocaleString('en-US')}</span>{' '}
+                  <span className="num font-semibold">{formatCount(total)}</span>{' '}
                   عملية
                 </p>
               )}
@@ -215,7 +216,7 @@ export const DistributorDashboardView: React.FC<DashboardViewProps> = ({
                               'num font-semibold',
                               entry.type === 'CREDIT' ? 'text-[#0f766e]' : 'text-[#0b1c30]',
                             )}>
-                              {Number(entry.amount).toFixed(2)}
+                              {formatAmount(entry.amount)}
                             </span>
                             <span className="text-xs text-[#444651]">د.ل</span>
                           </span>
@@ -299,7 +300,7 @@ export const DistributorDashboardView: React.FC<DashboardViewProps> = ({
                           'num text-xs font-bold',
                           acc.availableToSpend < 1000 ? 'text-[#b91c1c]' : 'text-[#0f766e]',
                         )}>
-                          {acc.availableToSpend.toFixed(2)}
+                          {formatAmount(acc.availableToSpend)}
                         </span>
                         <span className="text-[10px] text-[#94a3b8]">د.ل متاح</span>
                       </span>

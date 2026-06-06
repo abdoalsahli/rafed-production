@@ -1,4 +1,5 @@
 ﻿import React, { useState } from 'react';
+import { formatAmount } from '@/lib/numberUtils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -81,25 +82,25 @@ export function ProviderDistributorsTable({
                   <TableCell className="num text-[#0b1c30]">{dist.commissionPercentage}%</TableCell>
                   <TableCell>
                     <span className="inline-flex items-center gap-1">
-                      <span className="num font-semibold text-[#00236f]">{(dist.balance || 0).toFixed(2)}</span>
+                      <span className="num font-semibold text-[#00236f]">{formatAmount(dist.balance || 0)}</span>
                       <span className="text-xs text-[#444651]">د.ل</span>
                     </span>
                   </TableCell>
                   <TableCell>
                     <span className="inline-flex items-center gap-1">
-                      <span className="num">{dist.creditLine?.toFixed(2) || '0.00'}</span>
+                      <span className="num">{formatAmount(dist.creditLine || 0)}</span>
                       <span className="text-xs text-[#444651]">د.ل</span>
                     </span>
                   </TableCell>
                   <TableCell>
                     <span className="inline-flex items-center gap-1">
-                      <span className="num text-[#b91c1c]">{(dist.usedCredit || 0).toFixed(2)}</span>
+                      <span className="num text-[#b91c1c]">{formatAmount(dist.usedCredit || 0)}</span>
                       <span className="text-xs text-[#444651]">د.ل</span>
                     </span>
                   </TableCell>
                   <TableCell>
                     <span className="inline-flex items-center gap-1">
-                      <span className="num text-[#0f766e]">{(dist.availableToSpend || 0).toFixed(2)}</span>
+                      <span className="num text-[#0f766e]">{formatAmount(dist.availableToSpend || 0)}</span>
                       <span className="text-xs text-[#444651]">د.ل</span>
                     </span>
                   </TableCell>

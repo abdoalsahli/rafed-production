@@ -33,14 +33,14 @@ export const ApiDocsPage: React.FC = () => {
   const BASE_URL = window.location.origin;
 
   return (
-    <div dir="ltr" className="p-6 md:p-8 space-y-6 text-left">
+    <div className="p-6 md:p-8 space-y-6">
       <PageHeader
         title="توثيق API"
         subtitle="الدليل الشامل للتكامل مع منصة رافد لبطاقات الدفع المسبق"
       />
 
       {/* Base URL */}
-      <Card className="border-[#bfdbfe] bg-[#eff6ff]">
+      <Card dir="ltr" className="border-[#bfdbfe] bg-[#eff6ff] text-left">
         <CardContent className="py-4">
           <p className="text-sm font-semibold text-[#1e3a8a] mb-1">Base URL</p>
           <code className="text-sm font-mono text-[#1e40af]">{BASE_URL}/api/v1</code>
@@ -48,7 +48,7 @@ export const ApiDocsPage: React.FC = () => {
       </Card>
 
       {/* Quick Start */}
-      <Card>
+      <Card dir="ltr" className="text-left">
         <div className="px-6 py-4 border-b border-[#e2e8f0]">
           <h2 className="text-lg font-bold text-[#0b1c30]">Quick Start</h2>
         </div>
@@ -70,7 +70,7 @@ export const ApiDocsPage: React.FC = () => {
       </Card>
 
       {/* Authentication */}
-      <Card>
+      <Card dir="ltr" className="text-left">
         <div className="px-6 py-4 border-b border-[#e2e8f0]">
           <div className="flex items-center gap-2">
             <Lock size={20} className="text-[#444651]" />
@@ -128,7 +128,7 @@ X-API-Secret: your_secret_here`}
       </Card>
 
       {/* Idempotency */}
-      <Card>
+      <Card dir="ltr" className="text-left">
         <div className="px-6 py-4 border-b border-[#e2e8f0]">
           <h2 className="text-lg font-bold text-[#0b1c30]">Idempotency & Retries</h2>
         </div>
@@ -158,7 +158,7 @@ X-API-Secret: your_secret_here`}
       </Card>
 
       {/* Endpoints */}
-      <Card>
+      <Card dir="ltr" className="text-left">
         <div className="px-6 py-4 border-b border-[#e2e8f0]">
           <div className="flex items-center gap-2">
             <Code size={20} className="text-[#444651]" />
@@ -352,7 +352,7 @@ Idempotency-Key: order-00042`}
       </Card>
 
       {/* Error Handling */}
-      <Card>
+      <Card dir="ltr" className="text-left">
         <div className="px-6 py-4 border-b border-[#e2e8f0]">
           <h2 className="text-lg font-bold text-[#0b1c30]">Error Handling</h2>
         </div>
@@ -394,7 +394,7 @@ Idempotency-Key: order-00042`}
       </Card>
 
       {/* Security Best Practices */}
-      <Card>
+      <Card dir="ltr" className="text-left">
         <div className="px-6 py-4 border-b border-[#e2e8f0]">
           <div className="flex items-center gap-2">
             <Shield size={20} className="text-[#444651]" />

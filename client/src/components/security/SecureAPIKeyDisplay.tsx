@@ -32,7 +32,7 @@ export const SecureAPIKeyDisplay: React.FC<SecureAPIKeyDisplayProps> = ({
   };
 
   const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('en-US', {
+    return new Intl.DateTimeFormat('ar-LY-u-nu-latn', {
       month: 'short',
       day: 'numeric',
       year: 'numeric',

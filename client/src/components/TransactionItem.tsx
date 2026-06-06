@@ -4,6 +4,7 @@
  */
 
 import React from "react";
+import { formatAmount } from "@/lib/numberUtils";
 import { formatDateOnly, formatTimeOnly } from "@/lib/dateUtils";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 import Decimal from "decimal.js";
@@ -31,12 +32,12 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
   if (variant === "compact") {
     return (
       <div className="p-3 bg-slate-50 rounded-lg">
-        <p className="num text-sm font-semibold text-slate-900">{'د.ل '}{new Decimal(amount).toFixed(2)}</p>
+        <p className="num text-sm font-semibold text-slate-900">{'د.ل '}{formatAmount(new Decimal(amount).toNumber())}</p>
         <p className="text-xs text-slate-600 mt-1">
           {formatDateOnly(timestamp)}
         </p>
         <p className="num text-xs text-green-600 font-semibold mt-1">
-          {'د.ل +'}{new Decimal(commission).toFixed(2)} commission
+          {'د.ل +'}{formatAmount(new Decimal(commission).toNumber())} commission
         </p>
       </div>
     );
@@ -58,13 +59,13 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
             <div>
               <p className="text-xs text-slate-500">Amount</p>
               <p className="num text-sm font-semibold text-slate-900">
-                {'د.ل '}{new Decimal(amount).toFixed(2)}
+                {'د.ل '}{formatAmount(new Decimal(amount).toNumber())}
               </p>
             </div>
             <div>
               <p className="text-xs text-slate-500">Commission</p>
               <p className="num text-sm font-semibold text-green-600">
-                {'د.ل +'}{new Decimal(commission).toFixed(2)}
+                {'د.ل +'}{formatAmount(new Decimal(commission).toNumber())}
               </p>
             </div>
           </div>
@@ -78,7 +79,7 @@ export const TransactionItem: React.FC<TransactionItemProps> = ({
           <span className="text-xs font-semibold text-green-700">{status}</span>
         </div>
         <p className="num text-lg font-bold text-slate-900">
-          {'د.ل -'}{new Decimal(amount).toFixed(2)}
+          {'د.ل -'}{formatAmount(new Decimal(amount).toNumber())}
         </p>
       </div>
     </div>

@@ -1,4 +1,5 @@
 ﻿import React, { useState } from 'react';
+import { formatAmount } from '@/lib/numberUtils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -108,11 +109,11 @@ export const ProductCatalogView: React.FC<ProductCatalogViewProps> = ({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-[#444651]">القيمة الاسمية</p>
-                  <p className="font-medium num">{'د.ل '}{product.faceValue?.toFixed(2)}</p>
+                  <p className="font-medium num">{'د.ل '}{formatAmount(product.faceValue)}</p>
                 </div>
                 <div>
                   <p className="text-xs text-[#444651]">السعر</p>
-                  <p className="font-medium num">{'د.ل '}{product.price.toFixed(2)}</p>
+                  <p className="font-medium num">{'د.ل '}{formatAmount(product.price)}</p>
                 </div>
               </div>
 

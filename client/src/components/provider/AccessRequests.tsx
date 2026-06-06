@@ -1,4 +1,5 @@
 ﻿import React, { useState } from 'react';
+import { formatAmount } from '@/lib/numberUtils';
 import { formatDateOnly } from '@/lib/dateUtils';
 import { Check, X, Clock } from 'lucide-react';
 
@@ -62,7 +63,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({ isOpen, action, request, on
                 <div>
                   <p className="text-xs text-[#444651] font-semibold mb-1">الائتمان المطلوب</p>
                   <p className="text-lg font-bold num text-[#0b1c30]" dir="ltr">
-                    {'د.ل '}{request.requestedCredit.toLocaleString('en-US')}
+                    {'د.ل '}{formatAmount(request.requestedCredit)}
                   </p>
                 </div>
                 <div>
@@ -211,7 +212,7 @@ export const AccessRequests: React.FC<AccessRequestsProps> = ({
                     <div className="bg-[#eff4ff] rounded-lg p-3 border border-[#dce1ff]">
                       <p className="text-xs text-[#00236f] font-semibold mb-1">الائتمان المطلوب</p>
                       <p className="text-lg font-bold num text-[#00236f]" dir="ltr">
-                        {'د.ل '}{request.requestedCredit.toLocaleString('en-US')}
+                        {'د.ل '}{formatAmount(request.requestedCredit)}
                       </p>
                     </div>
                     <div className="bg-[#f8f9ff] rounded-lg p-3 border border-[#e2e8f0]">

@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatCount } from '@/lib/numberUtils';
 import { Button } from './button';
 
 /**
@@ -40,10 +41,10 @@ export function TablePaginationFooter({
       {/* Info — first DOM child = RIGHT in RTL */}
       <div className="flex items-center gap-3 text-[#444651]">
         <span>
-          <span className="num">{to.toLocaleString('en-US')}–{from.toLocaleString('en-US')}</span>
+          <span className="num">{formatCount(to)}–{formatCount(from)}</span>
           {' '}من{' '}
           <span className="num font-semibold text-[#0b1c30]">
-            {totalRows.toLocaleString('en-US')}
+            {formatCount(totalRows)}
           </span>
           {' '}سجل
         </span>
