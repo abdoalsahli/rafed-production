@@ -416,7 +416,6 @@ export const SettingsPage: React.FC = () => {
             </div>
           ))}
         </div>
-        )}
       </SectionCard>
 
       {/* ── Rotate confirm modal ──────────────────────────────────────────── */}
