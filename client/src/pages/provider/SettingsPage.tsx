@@ -120,8 +120,10 @@ export const ProviderSettingsPage: React.FC = () => {
   /* ── queries ──────────────────────────────────────────────────────────── */
   const { data: settingsData, isLoading: settingsLoading } =
     trpc.provider.getSettings.useQuery();
-  const { data: notifPrefs,   isLoading: notifLoading } =
-    trpc.user.getNotificationPreferences.useQuery();
+  const { data: notifPrefs } = trpc.user.getNotificationPreferences.useQuery(undefined, {
+    placeholderData: { transactionAlerts: true, weeklyReport: true, securityAlerts: true, productUpdates: false },
+    staleTime: 5 * 60 * 1000,
+  });
 
   /* ── mutations ────────────────────────────────────────────────────────── */
   const updateSettingsMutation = trpc.provider.updateSettings.useMutation({
@@ -346,11 +348,6 @@ export const ProviderSettingsPage: React.FC = () => {
         title="الإشعارات"
         subtitle="تُحفظ التفضيلات فور التبديل"
       >
-        {notifLoading ? (
-          <div className="space-y-3">
-            {[1,2,3,4].map(i => <div key={i} className="h-14 bg-[#e5eeff] animate-pulse rounded-lg" />)}
-          </div>
-        ) : (
         <div className="space-y-3">
           {(
             [
@@ -376,7 +373,6 @@ export const ProviderSettingsPage: React.FC = () => {
             </div>
           ))}
         </div>
-        )}
       </SectionCard>
 
       {/* ── System info ───────────────────────────────────────────────────── */}

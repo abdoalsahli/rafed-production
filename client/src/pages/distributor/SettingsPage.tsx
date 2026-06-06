@@ -103,7 +103,10 @@ export const SettingsPage: React.FC = () => {
   /* ── queries ──────────────────────────────────────────────────────────── */
   const { data: profileData,     isLoading: profileLoading } = trpc.distributor.getProfile.useQuery();
   const { data: apiCredentials,  isLoading: credsLoading,  refetch: refetchCreds } = trpc.distributorApi.getCredentials.useQuery();
-  const { data: notifPrefs,      isLoading: notifLoading }  = trpc.user.getNotificationPreferences.useQuery();
+  const { data: notifPrefs } = trpc.user.getNotificationPreferences.useQuery(undefined, {
+    placeholderData: { transactionAlerts: true, weeklyReport: true, securityAlerts: true, productUpdates: false },
+    staleTime: 5 * 60 * 1000,
+  });
 
   /* ── mutations ────────────────────────────────────────────────────────── */
   const updateProfileMutation = trpc.distributor.updateProfile.useMutation({
@@ -388,11 +391,6 @@ export const SettingsPage: React.FC = () => {
         title="الإشعارات"
         subtitle="تُحفظ التفضيلات فور التبديل"
       >
-        {notifLoading ? (
-          <div className="space-y-3">
-            {[1,2,3,4].map(i => <div key={i} className="h-14 bg-[#e5eeff] animate-pulse rounded-lg" />)}
-          </div>
-        ) : (
         <div className="space-y-3">
           {(
             [
