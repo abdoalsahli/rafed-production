@@ -1,0 +1,111 @@
+{
+  "version": "7",
+  "dialect": "mysql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1774392125341,
+      "tag": "0000_exotic_leper_queen",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1774392285279,
+      "tag": "0001_typical_baron_zemo",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1774392325582,
+      "tag": "0002_dashing_dexter_bennett",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "5",
+      "when": 1774462586936,
+      "tag": "0003_foamy_dust",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "5",
+      "when": 1774463411522,
+      "tag": "0004_minor_sunset_bain",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "5",
+      "when": 1774553811080,
+      "tag": "0005_thin_white_queen",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1776028614743,
+      "tag": "0006_smiling_nova",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "5",
+      "when": 1776264159996,
+      "tag": "0007_cold_lady_ursula",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "5",
+      "when": 1776290819672,
+      "tag": "0008_fancy_earthquake",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "5",
+      "when": 1776633798918,
+      "tag": "0009_huge_warstar",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "5",
+      "when": 1776637224173,
+      "tag": "0010_equal_sway",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "5",
+      "when": 1776941358270,
+      "tag": "0011_harsh_tombstone",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "5",
+      "when": 1777052629490,
+      "tag": "0012_slimy_mercury",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "5",
+      "when": 1777061253583,
+      "tag": "0013_old_stephen_strange",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "5",
+      "when": 1777066589478,
+      "tag": "0014_violet_azazel",
+      "breakpoints": true
+    }
+  ]
+}

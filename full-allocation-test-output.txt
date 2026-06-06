@@ -1,0 +1,121 @@
+✓ Environment validation passed
+✓ Connecting to database using DATABASE_URL
+✓ Database connection established
+✓ Database connection verified
+✓ Provider created: 6632387
+✓ Distributor created: 5655515
+✓ Product created: 1329637
+✓ Account created: 360455
+✓ Commission configured
+
+======================================================================
+FULL ALLOCATION BURST TEST: SAME-ACCOUNT CONCURRENT PURCHASES
+======================================================================
+
+Uploading 75 cards for 25-way test...
+✓ 75 cards uploaded
+
+[TEST] 25-way Same-Account Burst (Full Allocation)
+  Concurrency: 25
+  Success: 25/25 (100.00%)
+  Failed: 0
+  Total Duration: 684ms
+  Unique Cards Allocated: 5
+  Ledger Entries: 0
+  Transaction Duration (ms):
+    - Average: 147.40
+    - P95: 223.00
+    - P99: 282.00
+  Account Lock Wait (ms):
+    - Average: 71.80
+    - P95: 102.00
+    - P99: 105.00
+  Connection Errors: 0
+
+Uploading 100 cards for 50-way test...
+✓ 100 cards uploaded
+
+[TEST] 50-way Same-Account Burst (Full Allocation)
+  Concurrency: 50
+  Success: 50/50 (100.00%)
+  Failed: 0
+  Total Duration: 749ms
+  Unique Cards Allocated: 8
+  Ledger Entries: 0
+  Transaction Duration (ms):
+    - Average: 122.96
+    - P95: 239.00
+    - P99: 265.00
+  Account Lock Wait (ms):
+    - Average: 52.18
+    - P95: 58.00
+    - P99: 61.00
+  Connection Errors: 0
+
+Uploading 150 cards for 100-way test...
+✓ 150 cards uploaded
+
+[TEST] 100-way Same-Account Burst (Full Allocation)
+  Concurrency: 100
+  Success: 100/100 (100.00%)
+  Failed: 0
+  Total Duration: 1233ms
+  Unique Cards Allocated: 17
+  Ledger Entries: 0
+  Transaction Duration (ms):
+    - Average: 117.67
+    - P95: 213.00
+    - P99: 282.00
+  Account Lock Wait (ms):
+    - Average: 51.42
+    - P95: 56.00
+    - P99: 59.00
+  Connection Errors: 0
+
+Uploading 250 cards for 200-way test...
+✓ 250 cards uploaded
+
+[TEST] 200-way Same-Account Burst (Full Allocation)
+  Concurrency: 200
+  Success: 200/200 (100.00%)
+  Failed: 0
+  Total Duration: 2368ms
+  Unique Cards Allocated: 32
+  Ledger Entries: 0
+  Transaction Duration (ms):
+    - Average: 116.14
+    - P95: 210.00
+    - P99: 279.00
+  Account Lock Wait (ms):
+    - Average: 52.16
+    - P95: 57.00
+    - P99: 59.00
+  Connection Errors: 0
+
+Uploading 350 cards for 300-way test...
+✓ 350 cards uploaded
+
+[TEST] 300-way Same-Account Burst (Full Allocation)
+  Concurrency: 300
+  Success: 300/300 (100.00%)
+  Failed: 0
+  Total Duration: 3567ms
+  Unique Cards Allocated: 48
+  Ledger Entries: 0
+  Transaction Duration (ms):
+    - Average: 117.02
+    - P95: 211.00
+    - P99: 250.00
+  Account Lock Wait (ms):
+    - Average: 53.96
+    - P95: 59.00
+    - P99: 82.00
+  Connection Errors: 0
+
+======================================================================
+Cleaning up test data...
+✓ Cleanup complete
+
+======================================================================
+✅ FULL ALLOCATION BURST TEST COMPLETE
+======================================================================

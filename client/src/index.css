@@ -1,0 +1,556 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* Tajawal + Inter already loaded via <link> in index.html */
+
+@custom-variant dark (&:is(.dark *));
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Tailwind v4 @theme — maps CSS vars to utility classes
+   ═══════════════════════════════════════════════════════════════════════════ */
+@theme inline {
+  /* ── Radius scale (DESIGN.md: sm 4px · base 8px · md 12px · lg 16px · xl 24px) */
+  --radius-sm:   0.25rem;   /* 4px  — tight inner elements, chips        */
+  --radius-md:   0.75rem;   /* 12px — inputs, dropdowns                  */
+  --radius-lg:   1rem;      /* 16px — large cards, modal shells          */
+  --radius-xl:   1.5rem;    /* 24px — featured / hero containers         */
+  --radius-full: 9999px;    /* pill — status badges                      */
+
+  /* ── shadcn/ui core color mappings ────────────────────────────────────── */
+  --color-background:                   var(--background);
+  --color-foreground:                   var(--foreground);
+  --color-card:                         var(--card);
+  --color-card-foreground:              var(--card-foreground);
+  --color-popover:                      var(--popover);
+  --color-popover-foreground:           var(--popover-foreground);
+  --color-primary:                      var(--primary);
+  --color-primary-foreground:           var(--primary-foreground);
+  --color-secondary:                    var(--secondary);
+  --color-secondary-foreground:         var(--secondary-foreground);
+  --color-muted:                        var(--muted);
+  --color-muted-foreground:             var(--muted-foreground);
+  --color-accent:                       var(--accent);
+  --color-accent-foreground:            var(--accent-foreground);
+  --color-destructive:                  var(--destructive);
+  --color-destructive-foreground:       var(--destructive-foreground);
+  --color-border:                       var(--border);
+  --color-input:                        var(--input);
+  --color-ring:                         var(--ring);
+  --color-chart-1:                      var(--chart-1);
+  --color-chart-2:                      var(--chart-2);
+  --color-chart-3:                      var(--chart-3);
+  --color-chart-4:                      var(--chart-4);
+  --color-chart-5:                      var(--chart-5);
+  --color-sidebar:                      var(--sidebar);
+  --color-sidebar-foreground:           var(--sidebar-foreground);
+  --color-sidebar-primary:              var(--sidebar-primary);
+  --color-sidebar-primary-foreground:   var(--sidebar-primary-foreground);
+  --color-sidebar-accent:               var(--sidebar-accent);
+  --color-sidebar-accent-foreground:    var(--sidebar-accent-foreground);
+  --color-sidebar-border:               var(--sidebar-border);
+  --color-sidebar-ring:                 var(--sidebar-ring);
+
+  /* ── Rafed surface-scale tokens (creates bg-surface-*, text-on-surface etc.) */
+  --color-surface:                      var(--rf-surface);
+  --color-surface-dim:                  var(--rf-surface-dim);
+  --color-surface-container-lowest:     var(--rf-surface-container-lowest);
+  --color-surface-container-low:        var(--rf-surface-container-low);
+  --color-surface-container:            var(--rf-surface-container);
+  --color-surface-container-high:       var(--rf-surface-container-high);
+  --color-surface-container-highest:    var(--rf-surface-container-highest);
+  --color-on-surface:                   var(--rf-on-surface);
+  --color-on-surface-variant:           var(--rf-on-surface-variant);
+  --color-outline:                      var(--rf-outline);
+  --color-outline-variant:              var(--rf-outline-variant);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Light-mode design tokens  (source of truth → DESIGN.md)
+   ═══════════════════════════════════════════════════════════════════════════ */
+:root {
+  /* ── Base shape radius ────────────────────────────────────────────────
+     8px is the standard radius for cards, buttons, inputs (DESIGN.md)   */
+  --radius: 0.5rem;
+
+  /* ── Layout / spacing tokens ─────────────────────────────────────────
+     Used by sidebar, containers, and component gaps                      */
+  --sidebar-width:      260px;   /* DESIGN.md: sidebar-width              */
+  --container-padding:  2rem;    /* DESIGN.md: container-padding          */
+  --gutter:             1.5rem;  /* DESIGN.md: gutter between sections    */
+  --component-gap:      1rem;    /* DESIGN.md: gap between components     */
+  --stack-sm:           0.5rem;  /* DESIGN.md: tight vertical stack       */
+
+  /* ── Rafed brand palette ─────────────────────────────────────────────
+     Full token set from DESIGN.md front-matter                           */
+
+  /* Primary — deep navy #00236F */
+  --rf-primary:                    #00236f;
+  --rf-primary-container:          #1e3a8a;
+  --rf-on-primary:                 #ffffff;
+  --rf-on-primary-container:       #90a8ff;
+  --rf-inverse-primary:            #b6c4ff;
+  --rf-primary-fixed:              #dce1ff;
+  --rf-primary-fixed-dim:          #b6c4ff;
+  --rf-on-primary-fixed:           #00164e;
+  --rf-on-primary-fixed-variant:   #264191;
+  --rf-surface-tint:               #4059aa;
+
+  /* Secondary — teal #006A61 */
+  --rf-secondary:                  #006a61;
+  --rf-on-secondary:               #ffffff;
+  --rf-secondary-container:        #86f2e4;
+  --rf-on-secondary-container:     #006f66;
+  --rf-secondary-fixed:            #89f5e7;
+  --rf-secondary-fixed-dim:        #6bd8cb;
+  --rf-on-secondary-fixed:         #00201d;
+  --rf-on-secondary-fixed-variant: #005049;
+
+  /* Tertiary — warm brown #4B1C00 */
+  --rf-tertiary:                   #4b1c00;
+  --rf-on-tertiary:                #ffffff;
+  --rf-tertiary-container:         #6e2c00;
+  --rf-on-tertiary-container:      #f39461;
+  --rf-tertiary-fixed:             #ffdbcb;
+  --rf-tertiary-fixed-dim:         #ffb691;
+  --rf-on-tertiary-fixed:          #341100;
+  --rf-on-tertiary-fixed-variant:  #773205;
+
+  /* Error — #BA1A1A */
+  --rf-error:                      #ba1a1a;
+  --rf-on-error:                   #ffffff;
+  --rf-error-container:            #ffdad6;
+  --rf-on-error-container:         #93000a;
+
+  /* Surface scale — #F8F9FF → #FFFFFF */
+  --rf-surface:                    #f8f9ff;
+  --rf-surface-dim:                #cbdbf5;
+  --rf-surface-bright:             #f8f9ff;
+  --rf-surface-container-lowest:   #ffffff;
+  --rf-surface-container-low:      #eff4ff;
+  --rf-surface-container:          #e5eeff;
+  --rf-surface-container-high:     #dce9ff;
+  --rf-surface-container-highest:  #d3e4fe;
+  --rf-surface-variant:            #d3e4fe;
+  --rf-on-surface:                 #0b1c30;
+  --rf-on-surface-variant:         #444651;
+  --rf-inverse-surface:            #213145;
+  --rf-inverse-on-surface:         #eaf1ff;
+  --rf-outline:                    #757682;
+  --rf-outline-variant:            #c5c5d3;
+
+  /* ── Status semantic tokens (pill backgrounds + text colors) ─────────
+     Mapped from screenshot pill styles:
+       ناجحة=green · قيد المعالجة=blue · فشلت=red · معلقة=amber
+       نشط=teal  · موقوف=slate · تجاوز الحد=pink                         */
+  --rf-status-success-bg:          #dcfce7;   /* green-100  */
+  --rf-status-success-text:        #15803d;   /* green-700  */
+  --rf-status-success-dot:         #16a34a;   /* green-600  */
+
+  --rf-status-process-bg:          #dbeafe;   /* blue-100   */
+  --rf-status-process-text:        #1d4ed8;   /* blue-700   */
+  --rf-status-process-dot:         #2563eb;   /* blue-600   */
+
+  --rf-status-error-bg:            #fee2e2;   /* red-100    */
+  --rf-status-error-text:          #b91c1c;   /* red-700    */
+  --rf-status-error-dot:           #dc2626;   /* red-600    */
+
+  --rf-status-pending-bg:          #fef3c7;   /* amber-100  */
+  --rf-status-pending-text:        #b45309;   /* amber-700  */
+  --rf-status-pending-dot:         #d97706;   /* amber-600  */
+
+  --rf-status-active-bg:           #ccfbf1;   /* teal-100   */
+  --rf-status-active-text:         #0f766e;   /* teal-700   */
+  --rf-status-active-dot:          #0d9488;   /* teal-600   */
+
+  --rf-status-inactive-bg:         #f1f5f9;   /* slate-100  */
+  --rf-status-inactive-text:       #64748b;   /* slate-500  */
+
+  --rf-status-overlimit-bg:        #fce7f3;   /* pink-100   */
+  --rf-status-overlimit-text:      #be185d;   /* pink-700   */
+
+  /* ── shadcn/ui semantic variable mappings ────────────────────────────
+     These feed the Tailwind utilities via @theme inline above             */
+  --background:              #f8f9ff;   /* was oklch(1 0 0) — now brand surface */
+  --foreground:              #0b1c30;   /* was oklch(0.235 0.015 65) */
+  --card:                    #ffffff;   /* pure white card surface */
+  --card-foreground:         #0b1c30;
+  --popover:                 #ffffff;
+  --popover-foreground:      #0b1c30;
+  --primary:                 #00236f;   /* was blue-700 → deep navy */
+  --primary-foreground:      #ffffff;   /* was blue-50 */
+  --secondary:               #eff4ff;   /* was oklch(0.98...) → surface-container-low */
+  --secondary-foreground:    #0b1c30;
+  --muted:                   #e5eeff;   /* was oklch(0.967...) → surface-container */
+  --muted-foreground:        #444651;   /* was oklch(0.552...) → on-surface-variant */
+  --accent:                  #eff4ff;
+  --accent-foreground:       #0b1c30;
+  --destructive:             #ba1a1a;   /* was oklch(0.577...) → rf-error */
+  --destructive-foreground:  #ffffff;
+  --border:                  #e2e8f0;   /* 1px card/table border per DESIGN.md */
+  --input:                   #e2e8f0;
+  --ring:                    #00236f;   /* focus ring = primary */
+
+  /* Charts — navy/teal brand progression */
+  --chart-1: #00236f;
+  --chart-2: #1e3a8a;
+  --chart-3: #006a61;
+  --chart-4: #4059aa;
+  --chart-5: #86f2e4;
+
+  /* Sidebar */
+  --sidebar:                    #ffffff;   /* white sidebar surface */
+  --sidebar-foreground:         #0b1c30;
+  --sidebar-primary:            #00236f;   /* was blue-600 → deep navy */
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent:             #eff4ff;
+  --sidebar-accent-foreground:  #0b1c30;
+  --sidebar-border:             #e2e8f0;
+  --sidebar-ring:               #00236f;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Dark mode overrides (semantic inversion of the Rafed palette)
+   ═══════════════════════════════════════════════════════════════════════════ */
+.dark {
+  --background:              #0b1c30;   /* inverse-surface */
+  --foreground:              #eaf1ff;   /* inverse-on-surface */
+  --card:                    #213145;   /* slightly lighter than bg */
+  --card-foreground:         #eaf1ff;
+  --popover:                 #213145;
+  --popover-foreground:      #eaf1ff;
+  --primary:                 #b6c4ff;   /* inverse-primary (light on dark) */
+  --primary-foreground:      #00164e;   /* on-primary-fixed */
+  --secondary:               #264191;   /* on-primary-fixed-variant */
+  --secondary-foreground:    #eaf1ff;
+  --muted:                   #1e3a8a;   /* primary-container */
+  --muted-foreground:        #90a8ff;   /* on-primary-container */
+  --accent:                  #264191;
+  --accent-foreground:       #eaf1ff;
+  --destructive:             #ffdad6;   /* error-container */
+  --destructive-foreground:  #93000a;   /* on-error-container */
+  --border:                  rgba(255, 255, 255, 0.10);
+  --input:                   rgba(255, 255, 255, 0.15);
+  --ring:                    #b6c4ff;
+
+  --chart-1: #b6c4ff;
+  --chart-2: #90a8ff;
+  --chart-3: #6bd8cb;
+  --chart-4: #89f5e7;
+  --chart-5: #dce1ff;
+
+  --sidebar:                    #213145;
+  --sidebar-foreground:         #eaf1ff;
+  --sidebar-primary:            #b6c4ff;
+  --sidebar-primary-foreground: #00164e;
+  --sidebar-accent:             #264191;
+  --sidebar-accent-foreground:  #eaf1ff;
+  --sidebar-border:             rgba(255, 255, 255, 0.10);
+  --sidebar-ring:               #b6c4ff;
+
+  /* Dark surface overrides */
+  --rf-surface:                    #0b1c30;
+  --rf-surface-container-lowest:   #060f1a;
+  --rf-surface-container-low:      #111f30;
+  --rf-surface-container:          #1a2d42;
+  --rf-surface-container-high:     #213145;
+  --rf-surface-container-highest:  #2a3d52;
+  --rf-on-surface:                 #eaf1ff;
+  --rf-on-surface-variant:         #90a8ff;
+  --rf-outline:                    #90a8ff;
+  --rf-outline-variant:            #264191;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Base layer — global HTML element resets
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    font-family: 'Tajawal', 'Inter', system-ui, sans-serif;
+    direction: rtl;
+    /* Crisp sub-pixel rendering on all displays */
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    /* Generous line-height: Arabic letters need more vertical breathing room */
+    line-height: 1.65;
+    /* Force Western Arabic numerals (0-9) throughout despite lang="ar":
+       "locl" 0 disables the OpenType locale substitution in Tajawal that
+       maps ASCII digits 0-9 → Arabic-Indic ٠-٩ when lang is Arabic.
+       "kern" 1 keeps pair-kerning active for Inter.
+       Arabic letter shaping still works via calt / init / medi / fina. */
+    font-feature-settings: "locl" 0, "kern" 1;
+    -webkit-locale: 'en-u-nu-latn';
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* 15 px body text: Tajawal reads better slightly above the 14 px default */
+    font-size: 0.9375rem;
+    line-height: 1.65;
+  }
+
+  /* ── Heading defaults ────────────────────────────────────────────────────
+     Tailwind preflight resets all heading sizes. Re-apply Tajawal + tight
+     tracking so any h1-h6 without explicit Tailwind classes still looks
+     intentional. Components with text-* classes override these safely.    */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Tajawal', sans-serif;
+    font-weight: 700;
+    line-height: 1.3;
+    letter-spacing: -0.01em;
+  }
+
+  /* ── Global slim scrollbar ───────────────────────────────────────────────
+     Webkit (Chrome / Edge / Safari): thin 4px thumb, transparent track.
+     Firefox: thin keyword + brand color.                                   */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #c5c5d3 transparent;
+  }
+  *::-webkit-scrollbar {
+    width:  5px;
+    height: 5px;
+  }
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  *::-webkit-scrollbar-thumb {
+    background-color: #c5c5d3;
+    border-radius:    9999px;
+  }
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: #757682;
+  }
+
+  /* Sidebar nav — even thinner, barely visible until hover */
+  .sidebar-nav {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.2s;
+  }
+  .sidebar-nav:hover {
+    scrollbar-color: #c5c5d3 transparent;
+  }
+  .sidebar-nav::-webkit-scrollbar {
+    width: 3px;
+  }
+  .sidebar-nav::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .sidebar-nav::-webkit-scrollbar-thumb {
+    background-color: transparent;
+    border-radius:    9999px;
+    transition:       background-color 0.2s;
+  }
+  .sidebar-nav:hover::-webkit-scrollbar-thumb {
+    background-color: #c5c5d3;
+  }
+
+  /* Dark mode scrollbars */
+  .dark * {
+    scrollbar-color: #264191 transparent;
+  }
+  .dark *::-webkit-scrollbar-thumb {
+    background-color: #264191;
+  }
+  .dark .sidebar-nav:hover {
+    scrollbar-color: #264191 transparent;
+  }
+  .dark .sidebar-nav:hover::-webkit-scrollbar-thumb {
+    background-color: #264191;
+  }
+  /* Pointer cursor for all interactive elements */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [type="button"]:not(:disabled),
+  [type="submit"]:not(:disabled),
+  [type="reset"]:not(:disabled),
+  a[href],
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    @apply cursor-pointer;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Component layer — design-system utility classes
+   ═══════════════════════════════════════════════════════════════════════════ */
+@layer components {
+
+  /* ── Typography scale (DESIGN.md typography tokens) ─────────────────── */
+
+  /* display-lg  — Tajawal 30/700/42  — page hero numbers, large headings  */
+  .text-display-lg {
+    font-family: 'Tajawal', sans-serif;
+    font-size:   1.875rem;  /* 30px */
+    font-weight: 700;
+    line-height: 2.625rem;  /* 42px */
+  }
+
+  /* headline-md — Tajawal 22/700/32  — section headings, drawer titles    */
+  .text-headline-md {
+    font-family: 'Tajawal', sans-serif;
+    font-size:   1.375rem;  /* 22px */
+    font-weight: 700;
+    line-height: 2rem;      /* 32px */
+  }
+
+  /* title-sm    — Tajawal 16/700/24  — card headings, table section labels */
+  .text-title-sm {
+    font-family: 'Tajawal', sans-serif;
+    font-size:   1rem;      /* 16px */
+    font-weight: 700;
+    line-height: 1.5rem;    /* 24px */
+  }
+
+  /* body-md     — Tajawal 14/400/22  — primary body copy, form labels      */
+  .text-body-md {
+    font-family: 'Tajawal', sans-serif;
+    font-size:   0.875rem;  /* 14px */
+    font-weight: 400;
+    line-height: 1.375rem;  /* 22px */
+  }
+
+  /* body-sm     — Tajawal 13/400/20  — secondary body, table metadata      */
+  .text-body-sm {
+    font-family: 'Tajawal', sans-serif;
+    font-size:   0.8125rem; /* 13px */
+    font-weight: 400;
+    line-height: 1.25rem;   /* 20px */
+  }
+
+  /* label-xs    — Tajawal 11/500/16  — tags, badges, table column headers  */
+  .text-label-xs {
+    font-family: 'Tajawal', sans-serif;
+    font-size:   0.6875rem; /* 11px */
+    font-weight: 500;
+    line-height: 1rem;      /* 16px */
+  }
+
+  /* data-number — Inter  20/700/28  — financial KPI values in stat cards   */
+  .text-data-number {
+    font-family: 'Inter', sans-serif;
+    font-size:   1.25rem;   /* 20px */
+    font-weight: 700;
+    line-height: 1.75rem;   /* 28px */
+    direction:   ltr;       /* always LTR for digit legibility */
+    unicode-bidi: embed;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "locl" 0, "kern" 1;
+    letter-spacing: -0.02em;  /* tighter Inter digits look sharper */
+  }
+
+  /* .num — numeric element: Inter, LTR, tabular                            */
+  /* Safe on both <span> and <td> — does NOT change display type            */
+  .num {
+    font-family:    'Inter', sans-serif;
+    direction:      ltr;
+    unicode-bidi:   embed;   /* LTR bidi context without altering display   */
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "locl" 0, "kern" 1;
+    letter-spacing: -0.015em;
+  }
+
+  /* ── Status pill utility classes ─────────────────────────────────────── */
+  /* Apply .pill + one variant: pill-success, pill-process, pill-error …   */
+  .pill {
+    display:         inline-flex;
+    align-items:     center;
+    gap:             0.3rem;
+    padding:         0.15rem 0.625rem;
+    border-radius:   9999px;
+    font-size:       0.75rem;    /* 12px */
+    font-weight:     600;
+    line-height:     1.5;
+    white-space:     nowrap;
+    font-family:     'Tajawal', sans-serif;
+  }
+  /* ناجحة — Successful */
+  .pill-success  {
+    background-color: var(--rf-status-success-bg);
+    color:            var(--rf-status-success-text);
+  }
+  /* قيد المعالجة — Processing */
+  .pill-process  {
+    background-color: var(--rf-status-process-bg);
+    color:            var(--rf-status-process-text);
+  }
+  /* فشلت — Failed */
+  .pill-error    {
+    background-color: var(--rf-status-error-bg);
+    color:            var(--rf-status-error-text);
+  }
+  /* معلقة — Pending */
+  .pill-pending  {
+    background-color: var(--rf-status-pending-bg);
+    color:            var(--rf-status-pending-text);
+  }
+  /* نشط — Active */
+  .pill-active   {
+    background-color: var(--rf-status-active-bg);
+    color:            var(--rf-status-active-text);
+  }
+  /* موقوف — Suspended / Inactive */
+  .pill-inactive {
+    background-color: var(--rf-status-inactive-bg);
+    color:            var(--rf-status-inactive-text);
+  }
+  /* تجاوز الحد — Over Limit */
+  .pill-overlimit {
+    background-color: var(--rf-status-overlimit-bg);
+    color:            var(--rf-status-overlimit-text);
+  }
+
+  /* ── Icon container (DESIGN.md: 40×40px, 8px radius) ─────────────────── */
+  .icon-box {
+    display:         flex;
+    align-items:     center;
+    justify-content: center;
+    width:           2.5rem;    /* 40px */
+    height:          2.5rem;    /* 40px */
+    border-radius:   0.5rem;    /* 8px  */
+    flex-shrink:     0;
+  }
+  /* Soft-tinted variants — used in KPI cards */
+  .icon-box-primary  { background-color: var(--rf-primary-fixed);       color: var(--rf-on-primary-fixed); }
+  .icon-box-teal     { background-color: var(--rf-secondary-container);  color: var(--rf-secondary); }
+  .icon-box-amber    { background-color: var(--rf-tertiary-fixed);       color: var(--rf-on-tertiary-fixed-variant); }
+  .icon-box-red      { background-color: var(--rf-error-container);      color: var(--rf-on-error-container); }
+  .icon-box-muted    { background-color: var(--rf-surface-container);    color: var(--rf-on-surface-variant); }
+
+  /* ── Standard Rafed card (DESIGN.md: white, 1px #E2E8F0, 8px, 24px pad) */
+  .rf-card {
+    background-color: var(--card);
+    border:           1px solid #e2e8f0;
+    border-radius:    0.5rem;    /* 8px  */
+    padding:          1.5rem;    /* 24px */
+  }
+
+  /* ── Page canvas background ─────────────────────────────────────────── */
+  .rf-page {
+    background-color: var(--background);  /* #F8F9FF */
+    min-height:       100vh;
+    padding:          var(--container-padding);
+  }
+
+  /* ── Container with responsive padding ──────────────────────────────── */
+  .container {
+    width:         100%;
+    margin-left:   auto;
+    margin-right:  auto;
+    padding-left:  1rem;
+    padding-right: 1rem;
+  }
+  @media (min-width: 640px) {
+    .container { padding-left: 1.5rem; padding-right: 1.5rem; }
+  }
+  @media (min-width: 1024px) {
+    .container { padding-left: 2rem; padding-right: 2rem; max-width: 1280px; }
+  }
+
+  /* ── Flex overflow fix (prevents flex children from overflowing) ─────── */
+  .flex { min-height: 0; min-width: 0; }
+}

@@ -1,0 +1,228 @@
+groups:
+  - name: queue_system_alerts
+    interval: 30s
+    rules:
+      # ============================================================================
+      # INFRASTRUCTURE STABILITY ALERTS
+      # ============================================================================
+
+      - alert: ConnectionPoolSaturation
+        expr: |
+          (queue_connection_pool_active / queue_connection_pool_max) > 0.8
+        for: 2m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "Connection pool saturation warning"
+          description: "Connection pool is {{ $value | humanizePercentage }} saturated. Active: {{ $value | humanize }} / {{ $value | humanize }} max."
+
+      - alert: ConnectionPoolCritical
+        expr: |
+          (queue_connection_pool_active / queue_connection_pool_max) > 0.95
+        for: 1m
+        labels:
+          severity: critical
+          category: infrastructure
+        annotations:
+          summary: "Connection pool critical saturation"
+          description: "Connection pool is {{ $value | humanizePercentage }} saturated. Immediate action required."
+
+      - alert: HighMemoryUsage
+        expr: |
+          process_resident_memory_bytes > 500000000
+        for: 5m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "High memory usage detected"
+          description: "Process memory usage is {{ $value | humanize }}B (threshold: 500MB)"
+
+      - alert: CriticalMemoryUsage
+        expr: |
+          process_resident_memory_bytes > 800000000
+        for: 2m
+        labels:
+          severity: critical
+          category: infrastructure
+        annotations:
+          summary: "Critical memory usage - potential OOM"
+          description: "Process memory usage is {{ $value | humanize }}B (threshold: 800MB)"
+
+      - alert: RepeatedServerErrors
+        expr: |
+          increase(queue_server_errors_total[5m]) > 10
+        for: 2m
+        labels:
+          severity: warning
+          category: infrastructure
+        annotations:
+          summary: "Repeated server errors detected"
+          description: "{{ $value | humanize }} server errors in last 5 minutes"
+
+      - alert: ServerCrashRestart
+        expr: |
+          increase(queue_server_restarts_total[10m]) > 2
+        for: 1m
+        labels:
+          severity: critical
+          category: infrastructure
+        annotations:
+          summary: "Server crash/restart loop detected"
+          description: "{{ $value | humanize }} server restarts in last 10 minutes"
+
+      # ============================================================================
+      # QUEUE OPERATIONS ALERTS
+      # ============================================================================
+
+      - alert: QueueDepthWarning
+        expr: |
+          queue_depth > 5000
+        for: 5m
+        labels:
+          severity: warning
+          category: queue_operations
+        annotations:
+          summary: "Queue depth warning"
+          description: "Account {{ $labels.provider_id }}/{{ $labels.distributor_id }} queue depth: {{ $value | humanize }}"
+
+      - alert: QueueDepthCritical
+        expr: |
+          queue_depth > 8000
+        for: 2m
+        labels:
+          severity: critical
+          category: queue_operations
+        annotations:
+          summary: "Queue depth critical"
+          description: "Account {{ $labels.provider_id }}/{{ $labels.distributor_id }} queue depth: {{ $value | humanize }} (max: 10000)"
+
+      - alert: OldestPendingAgeTooHigh
+        expr: |
+          queue_oldest_pending_age_seconds > 300
+        for: 5m
+        labels:
+          severity: warning
+          category: queue_operations
+        annotations:
+          summary: "Oldest pending request too old"
+          description: "Account {{ $labels.provider_id }}/{{ $labels.distributor_id }} oldest pending: {{ $value | humanizeDuration }}"
+
+      - alert: OldestPendingAgeCritical
+        expr: |
+          queue_oldest_pending_age_seconds > 600
+        for: 2m
+        labels:
+          severity: critical
+          category: queue_operations
+        annotations:
+          summary: "Oldest pending request critically old"
+          description: "Account {{ $labels.provider_id }}/{{ $labels.distributor_id }} oldest pending: {{ $value | humanizeDuration }}"
+
+      - alert: StaleWorkerHeartbeat
+        expr: |
+          queue_worker_heartbeat_stale == 1
+        for: 2m
+        labels:
+          severity: critical
+          category: queue_operations
+        annotations:
+          summary: "Worker heartbeat stale"
+          description: "Account {{ $labels.provider_id }}/{{ $labels.distributor_id }} worker heartbeat is stale"
+
+      - alert: RecoveryCountSpike
+        expr: |
+          increase(queue_recovery_count[10m]) > 5
+        for: 2m
+        labels:
+          severity: warning
+          category: queue_operations
+        annotations:
+          summary: "Recovery count spike detected"
+          description: "Account {{ $labels.provider_id }}/{{ $labels.distributor_id }} had {{ $value | humanize }} recoveries in 10m"
+
+      # ============================================================================
+      # PERFORMANCE ALERTS
+      # ============================================================================
+
+      - alert: P95ProcessingDurationHigh
+        expr: |
+          queue_processing_duration_p95_ms > 2000
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "P95 processing duration high"
+          description: "Account {{ $labels.provider_id }}/{{ $labels.distributor_id }} P95 duration: {{ $value | humanize }}ms (threshold: 2000ms)"
+
+      - alert: P99ProcessingDurationCritical
+        expr: |
+          queue_processing_duration_p99_ms > 5000
+        for: 2m
+        labels:
+          severity: critical
+          category: performance
+        annotations:
+          summary: "P99 processing duration critical"
+          description: "Account {{ $labels.provider_id }}/{{ $labels.distributor_id }} P99 duration: {{ $value | humanize }}ms (threshold: 5000ms)"
+
+      - alert: P95QueueWaitHigh
+        expr: |
+          queue_wait_p95_ms > 1000
+        for: 5m
+        labels:
+          severity: warning
+          category: performance
+        annotations:
+          summary: "P95 queue wait time high"
+          description: "Account {{ $labels.provider_id }}/{{ $labels.distributor_id }} P95 wait: {{ $value | humanize }}ms"
+
+      - alert: P99QueueWaitCritical
+        expr: |
+          queue_wait_p99_ms > 3000
+        for: 2m
+        labels:
+          severity: critical
+          category: performance
+        annotations:
+          summary: "P99 queue wait time critical"
+          description: "Account {{ $labels.provider_id }}/{{ $labels.distributor_id }} P99 wait: {{ $value | humanize }}ms"
+
+      # ============================================================================
+      # FINANCIAL INTEGRITY ALERTS
+      # ============================================================================
+
+      - alert: LedgerMismatch
+        expr: |
+          queue_ledger_mismatch == 1
+        for: 1m
+        labels:
+          severity: critical
+          category: financial_integrity
+        annotations:
+          summary: "CRITICAL: Ledger mismatch detected"
+          description: "Account {{ $labels.provider_id }}/{{ $labels.distributor_id }} ledger mismatch. Successful: {{ $value | humanize }}, Debits: {{ $value | humanize }}, Credits: {{ $value | humanize }}"
+
+      - alert: FailedPurchasesSpike
+        expr: |
+          increase(queue_failed_purchases_total[10m]) > 20
+        for: 2m
+        labels:
+          severity: warning
+          category: financial_integrity
+        annotations:
+          summary: "Failed purchases spike"
+          description: "Account {{ $labels.provider_id }}/{{ $labels.distributor_id }} had {{ $value | humanize }} failed purchases in 10m"
+
+      - alert: FailedPurchasesCritical
+        expr: |
+          (increase(queue_failed_purchases_total[10m]) / (increase(queue_total_purchases[10m]) + 1)) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+          category: financial_integrity
+        annotations:
+          summary: "Failed purchase rate critical"
+          description: "Account {{ $labels.provider_id }}/{{ $labels.distributor_id }} failure rate: {{ $value | humanizePercentage }}"

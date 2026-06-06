@@ -1,0 +1,111 @@
+✓ Environment validation passed
+✓ Connecting to database using DATABASE_URL
+✓ Database connection established
+✓ Database connection verified
+✓ Provider created: 6632386
+✓ Distributor created: 5655514
+✓ Product created: 1329636
+✓ Account created: 360454
+✓ Commission configured
+
+======================================================================
+BURST LOAD TEST: SAME-ACCOUNT CONCURRENT PURCHASES
+======================================================================
+
+[TEST] 25-way Same-Account Burst
+  Concurrency: 25
+  Success: 25/25 (100.00%)
+  Failed: 0
+  Total Duration: 767ms
+  Unique Cards Allocated: 5
+  Ledger Entries: 0
+  Transaction Duration (ms):
+    - Average: 147.60
+    - P95: 214.00
+    - P99: 218.00
+  Account Lock Wait (ms):
+    - Average: 68.84
+    - P95: 99.00
+    - P99: 103.00
+  Connection Pool: Before=0, After=0
+  Connection Errors: 0
+
+[TEST] 50-way Same-Account Burst
+  Concurrency: 50
+  Success: 50/50 (100.00%)
+  Failed: 0
+  Total Duration: 741ms
+  Unique Cards Allocated: 9
+  Ledger Entries: 0
+  Transaction Duration (ms):
+    - Average: 134.84
+    - P95: 292.00
+    - P99: 317.00
+  Account Lock Wait (ms):
+    - Average: 50.98
+    - P95: 56.00
+    - P99: 61.00
+  Connection Pool: Before=0, After=0
+  Connection Errors: 0
+
+[TEST] 100-way Same-Account Burst
+  Concurrency: 100
+  Success: 100/100 (100.00%)
+  Failed: 0
+  Total Duration: 1232ms
+  Unique Cards Allocated: 17
+  Ledger Entries: 0
+  Transaction Duration (ms):
+    - Average: 120.11
+    - P95: 235.00
+    - P99: 308.00
+  Account Lock Wait (ms):
+    - Average: 50.49
+    - P95: 54.00
+    - P99: 54.00
+  Connection Pool: Before=0, After=0
+  Connection Errors: 0
+
+[TEST] 200-way Same-Account Burst
+  Concurrency: 200
+  Success: 200/200 (100.00%)
+  Failed: 0
+  Total Duration: 2374ms
+  Unique Cards Allocated: 29
+  Ledger Entries: 0
+  Transaction Duration (ms):
+    - Average: 114.29
+    - P95: 202.00
+    - P99: 272.00
+  Account Lock Wait (ms):
+    - Average: 50.47
+    - P95: 55.00
+    - P99: 61.00
+  Connection Pool: Before=0, After=0
+  Connection Errors: 0
+
+[TEST] 300-way Same-Account Burst
+  Concurrency: 300
+  Success: 300/300 (100.00%)
+  Failed: 0
+  Total Duration: 3436ms
+  Unique Cards Allocated: 40
+  Ledger Entries: 0
+  Transaction Duration (ms):
+    - Average: 112.87
+    - P95: 205.00
+    - P99: 239.00
+  Account Lock Wait (ms):
+    - Average: 50.97
+    - P95: 55.00
+    - P99: 65.00
+  Connection Pool: Before=0, After=0
+  Connection Errors: 0
+
+======================================================================
+Cleaning up test data...
+✓ Cleanup complete
+
+======================================================================
+✅ BURST LOAD TEST COMPLETE
+======================================================================

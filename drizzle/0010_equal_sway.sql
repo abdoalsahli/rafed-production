@@ -1,0 +1,1 @@
+ALTER TABLE `purchase_requests` ADD `recovery_attempt_count` int DEFAULT 0 NOT NULL;
