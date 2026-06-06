@@ -72,8 +72,8 @@ export default function ProviderTransactionsPage() {
 
   /* ── helpers ──────────────────────────────────────────────────────────── */
   const formatCurrency = (value: any) => {
-    const num = typeof value === 'string' ? parseFloat(value) : value;
-    return `د.ل ${new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num)}`;
+    const num = typeof value === 'string' ? parseFloat(value) : (value ?? 0);
+    return new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
   };
 
   const handleExportCSV = () => {
@@ -158,12 +158,14 @@ export default function ProviderTransactionsPage() {
           <StatCard
             title="إجمالي المبيعات"
             value={formatCurrency(summaryData?.totalSales || 0)}
+            unit="د.ل"
             icon={<DollarSign size={20} />}
             iconVariant="primary"
           />
           <StatCard
             title="إجمالي العمولة"
             value={formatCurrency(summaryData?.totalCommission || 0)}
+            unit="د.ل"
             icon={<TrendingUp size={20} />}
             iconVariant="teal"
           />
@@ -347,10 +349,10 @@ export default function ProviderTransactionsPage() {
                     <TableCell>{txn.distributorName || '—'}</TableCell>
                     <TableCell>{txn.productName     || '—'}</TableCell>
                     <TableCell className="num font-semibold text-[#0b1c30]">
-                      {formatCurrency(txn.amount, txn.productCurrency)}
+                      {'د.ل '}{formatCurrency(txn.amount)}
                     </TableCell>
                     <TableCell className="num font-semibold text-[#0f766e]">
-                      {formatCurrency(txn.commissionAmount, txn.productCurrency)}
+                      {'د.ل '}{formatCurrency(txn.commissionAmount)}
                     </TableCell>
                     <TableCell>
                       <StatusPill status={txn.status} />
