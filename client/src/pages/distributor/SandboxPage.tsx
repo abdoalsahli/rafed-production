@@ -10,7 +10,7 @@ export const SandboxPage: React.FC = () => {
   const baseUrl = window.location.origin;
 
   return (
-    <div className="p-6 md:p-8 space-y-6">
+    <div dir="ltr" className="p-6 md:p-8 space-y-6 text-left">
       <PageHeader
         title="الاختبار والتجربة"
         subtitle="اختبر تكاملك خطوة بخطوة قبل الإطلاق"

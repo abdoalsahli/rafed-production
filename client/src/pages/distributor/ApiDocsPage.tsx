@@ -33,7 +33,7 @@ export const ApiDocsPage: React.FC = () => {
   const BASE_URL = window.location.origin;
 
   return (
-    <div className="p-6 md:p-8 space-y-6">
+    <div dir="ltr" className="p-6 md:p-8 space-y-6 text-left">
       <PageHeader
         title="توثيق API"
         subtitle="الدليل الشامل للتكامل مع منصة رافد لبطاقات الدفع المسبق"
