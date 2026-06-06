@@ -165,18 +165,7 @@ export const SettingsPage: React.FC = () => {
     setCurrentPassword(''); setNewPassword(''); setConfirmPassword('');
   };
 
-  const isLoading = profileLoading || credsLoading || notifLoading;
-
-  if (isLoading) {
-    return (
-      <div className="p-6 flex items-center justify-center min-h-[60vh]">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-8 h-8 border-2 border-[#00236f] border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm text-[#444651]">جاري تحميل الإعدادات…</p>
-        </div>
-      </div>
-    );
-  }
+  // Render sections independently — don't block the whole page on all queries
 
   /* ── render ───────────────────────────────────────────────────────────── */
   const FIELD_LABELS: Record<keyof SettingsForm, string> = {
@@ -199,6 +188,11 @@ export const SettingsPage: React.FC = () => {
         title="الملف الشخصي"
         subtitle="تحديث بياناتك الشخصية"
       >
+        {profileLoading ? (
+          <div className="space-y-3">
+            {[1,2,3,4].map(i => <div key={i} className="h-10 bg-[#e5eeff] animate-pulse rounded-lg" />)}
+          </div>
+        ) : (
         <div className="space-y-4">
           {(['fullName', 'email', 'phone', 'company'] as const).map((field) => (
             <div key={field}>
@@ -225,6 +219,7 @@ export const SettingsPage: React.FC = () => {
             </button>
           </div>
         </div>
+        )}
       </SectionCard>
 
       {/* ── Security ─────────────────────────────────────────────────────── */}
@@ -253,6 +248,11 @@ export const SettingsPage: React.FC = () => {
         title="Webhook ومفتاح API"
         subtitle="إعداد استقبال إشعارات المشتريات"
       >
+        {credsLoading ? (
+          <div className="space-y-3">
+            {[1,2,3].map(i => <div key={i} className="h-10 bg-[#e5eeff] animate-pulse rounded-lg" />)}
+          </div>
+        ) : (
         <div className="space-y-5">
           {/* Status */}
           {apiCredentials && (
@@ -379,6 +379,7 @@ export const SettingsPage: React.FC = () => {
             </div>
           )}
         </div>
+        )}
       </SectionCard>
 
       {/* ── Notifications ─────────────────────────────────────────────────── */}
@@ -387,6 +388,11 @@ export const SettingsPage: React.FC = () => {
         title="الإشعارات"
         subtitle="تُحفظ التفضيلات فور التبديل"
       >
+        {notifLoading ? (
+          <div className="space-y-3">
+            {[1,2,3,4].map(i => <div key={i} className="h-14 bg-[#e5eeff] animate-pulse rounded-lg" />)}
+          </div>
+        ) : (
         <div className="space-y-3">
           {(
             [
@@ -412,6 +418,7 @@ export const SettingsPage: React.FC = () => {
             </div>
           ))}
         </div>
+        )}
       </SectionCard>
 
       {/* ── Rotate confirm modal ──────────────────────────────────────────── */}

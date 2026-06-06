@@ -7,7 +7,6 @@ import {
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { TableSkeleton } from '@/components/ui/skeleton';
 
 /* ── types ─────────────────────────────────────────────────────────────── */
 interface SettingsForm {
@@ -198,22 +197,7 @@ export const ProviderSettingsPage: React.FC = () => {
     updateNotifMutation.mutate(updated);
   };
 
-  const isLoading = settingsLoading || notifLoading;
-
-  /* ── loading ──────────────────────────────────────────────────────────── */
-  if (isLoading) {
-    return (
-      <div className="p-6 md:p-8 space-y-6">
-        <div className="h-8 w-48 bg-[#e5eeff] animate-pulse rounded" />
-        <div className="bg-white border border-[#e2e8f0] rounded-lg overflow-hidden">
-          <div className="px-6 py-4 border-b border-[#e2e8f0] h-14 bg-[#f8f9ff]" />
-          <div className="p-6">
-            <TableSkeleton rows={4} cols={1} />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Render sections independently — don't block the whole page on all queries
 
   /* ── render ───────────────────────────────────────────────────────────── */
   return (
@@ -231,6 +215,11 @@ export const ProviderSettingsPage: React.FC = () => {
         title="ملف المؤسسة"
         subtitle="تحديث بيانات مؤسستك كمزود"
       >
+        {settingsLoading ? (
+          <div className="space-y-3">
+            {[1,2,3,4,5,6].map(i => <div key={i} className="h-10 bg-[#e5eeff] animate-pulse rounded-lg" />)}
+          </div>
+        ) : (
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-medium text-[#444651] mb-1.5">
@@ -328,6 +317,7 @@ export const ProviderSettingsPage: React.FC = () => {
             </button>
           </div>
         </div>
+        )}
       </SectionCard>
 
       {/* ── Security ──────────────────────────────────────────────────────── */}
@@ -356,6 +346,11 @@ export const ProviderSettingsPage: React.FC = () => {
         title="الإشعارات"
         subtitle="تُحفظ التفضيلات فور التبديل"
       >
+        {notifLoading ? (
+          <div className="space-y-3">
+            {[1,2,3,4].map(i => <div key={i} className="h-14 bg-[#e5eeff] animate-pulse rounded-lg" />)}
+          </div>
+        ) : (
         <div className="space-y-3">
           {(
             [
@@ -381,6 +376,7 @@ export const ProviderSettingsPage: React.FC = () => {
             </div>
           ))}
         </div>
+        )}
       </SectionCard>
 
       {/* ── System info ───────────────────────────────────────────────────── */}
