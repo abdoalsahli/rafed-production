@@ -188,6 +188,10 @@ export const financialRouter = router({
           whereConditions.push(eq(providerDistributorLedger.providerId, input.providerId));
         }
 
+        // Only show purchase entries — commissions are internal accounting,
+        // not transactions the distributor initiated.
+        const purchaseConditions = [...whereConditions, eq(providerDistributorLedger.referenceType, "purchase_debit")];
+
         // Run entries query and total count query in parallel
         const [entries, [{ total }]] = await Promise.all([
           db
@@ -209,14 +213,14 @@ export const financialRouter = router({
               serviceProviders,
               eq(providerDistributorLedger.providerId, serviceProviders.id)
             )
-            .where(and(...whereConditions))
+            .where(and(...purchaseConditions))
             .orderBy(desc(providerDistributorLedger.createdAt))
             .limit(input.limit)
             .offset(input.offset),
           db
             .select({ total: count() })
             .from(providerDistributorLedger)
-            .where(and(...whereConditions)),
+            .where(and(...purchaseConditions)),
         ]);
 
         // TIMING: Log execution time
@@ -300,11 +304,13 @@ export const financialRouter = router({
         }
 
         // Run both aggregations in parallel
+        // totalAmount  = purchases only (purchase_debit) — commissions excluded
+        // totalCommission = commission credits only
         const [totalResult, commissionResult] = await Promise.all([
           db
             .select({ total: sum(providerDistributorLedger.amount) })
             .from(providerDistributorLedger)
-            .where(and(...whereConditions)),
+            .where(and(...whereConditions, eq(providerDistributorLedger.referenceType, "purchase_debit"))),
           db
             .select({ total: sum(providerDistributorLedger.amount) })
             .from(providerDistributorLedger)
