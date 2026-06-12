@@ -303,9 +303,9 @@ export async function handleConfirmCardUpload(
       const connection = await rawDb.getConnection();
       try {
         await connection.execute(
-          `INSERT INTO cards (provider_id, product_id, batch_id, pin_encrypted, pin_hash, status) 
-           VALUES (?, ?, ?, ?, ?, ?)`,
-          [providerId, preview.productId, batchId, encryptedPin, pinHash, "AVAILABLE"]
+          `INSERT INTO cards (provider_id, product_id, batch_id, pin_encrypted, pin_hash, serial_number, status)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [providerId, preview.productId, batchId, encryptedPin, pinHash, card.serialNumber ?? null, "AVAILABLE"]
         );
       } finally {
         connection.release();

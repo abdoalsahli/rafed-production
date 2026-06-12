@@ -30,8 +30,8 @@ export function parseCSV(csvContent: string): ParseResult {
     const line = lines[i];
     const parts = line.split(',').map((p) => p.trim());
 
-    const pin = parts[0];
-    const serialNumber = parts[1] || null;
+    const pin          = parts[0];
+    const serialNumber = parts[1]?.trim() || null;
 
     // Validate PIN
     if (!pin || pin.length === 0) {
@@ -39,20 +39,19 @@ export function parseCSV(csvContent: string): ParseResult {
       continue;
     }
 
-    // Validate serial number length if provided
-    if (serialNumber && serialNumber.length > 128) {
-      errors.push({
-        rowNumber,
-        error: 'Serial number exceeds 128 characters',
-      });
+    // Serial number is required
+    if (!serialNumber) {
+      errors.push({ rowNumber, error: 'Serial number is required' });
       continue;
     }
 
-    cards.push({
-      pin,
-      serialNumber: serialNumber || null,
-      rowNumber,
-    });
+    // Validate serial number length
+    if (serialNumber.length > 128) {
+      errors.push({ rowNumber, error: 'Serial number exceeds 128 characters' });
+      continue;
+    }
+
+    cards.push({ pin, serialNumber, rowNumber });
   }
 
   return {
@@ -107,12 +106,15 @@ export function parseXLSX(buffer: Buffer): ParseResult {
     if (pinColumnIndex === -1) {
       return {
         cards: [],
-        errors: [
-          {
-            rowNumber: 0,
-            error: 'PIN column is required. Expected columns: PIN, Serial Number',
-          },
-        ],
+        errors: [{ rowNumber: 0, error: 'PIN column is required. Expected columns: PIN, Serial Number' }],
+        totalRows: rows.length,
+      };
+    }
+
+    if (serialColumnIndex === -1) {
+      return {
+        cards: [],
+        errors: [{ rowNumber: 0, error: 'Serial Number column is required. Expected columns: PIN, Serial Number' }],
         totalRows: rows.length,
       };
     }
@@ -142,20 +144,19 @@ export function parseXLSX(buffer: Buffer): ParseResult {
         continue;
       }
 
-      // Validate serial number length if provided
-      if (serialNumber && serialNumber.length > 128) {
-        errors.push({
-          rowNumber,
-          error: 'Serial number exceeds 128 characters',
-        });
+      // Serial number is required
+      if (!serialNumber) {
+        errors.push({ rowNumber, error: 'Serial number is required' });
         continue;
       }
 
-      cards.push({
-        pin,
-        serialNumber: serialNumber || null,
-        rowNumber,
-      });
+      // Validate serial number length
+      if (serialNumber.length > 128) {
+        errors.push({ rowNumber, error: 'Serial number exceeds 128 characters' });
+        continue;
+      }
+
+      cards.push({ pin, serialNumber, rowNumber });
     }
 
     return {

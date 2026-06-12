@@ -373,6 +373,21 @@ export async function getCardEncryptedPin(
   return result.length > 0 ? result[0].pinEncrypted : null;
 }
 
+export async function getCardDetails(
+  db: any,
+  cardId: number,
+): Promise<{ pinEncrypted: string; serialNumber: string | null } | null> {
+  const result = await db
+    .select()
+    .from(cards)
+    .where(eq(cards.id, cardId))
+    .limit(1);
+
+  return result.length > 0
+    ? { pinEncrypted: result[0].pinEncrypted, serialNumber: result[0].serialNumber ?? null }
+    : null;
+}
+
 /**
  * AUDIT LOGGING - Append-only audit trail for compliance
  * 

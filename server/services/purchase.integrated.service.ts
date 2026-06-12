@@ -1,4 +1,4 @@
-import { getDb, atomicAllocateAndMarkCard, getCommissionRate, getTransactionByIdempotencyKey, getProduct, atomicMarkPinAsViewed, getCardEncryptedPin } from "../db";
+import { getDb, atomicAllocateAndMarkCard, getCommissionRate, getTransactionByIdempotencyKey, getProduct, atomicMarkPinAsViewed, getCardEncryptedPin, getCardDetails } from "../db";
 import { pinEncryptionService } from "./encryption.service";
 import { FinancialService } from "./financial.service";
 import { Decimal } from "decimal.js";
@@ -37,6 +37,7 @@ export interface PurchaseCardResponse {
   transactionId: string;
   status: "completed" | "failed";
   pin: string | null;
+  serialNumber: string | null;
   message?: string;
   amount: string;
   commission: string;
@@ -275,6 +276,7 @@ export class PurchaseIntegratedService {
     // STEP 10: AFTER transaction commit - Atomic PIN access control
     // ============================================================
     let decryptedPin: string | null = null;
+    let serialNumber:  string | null = null;
     let pinAccessGranted = false;
 
     try {
@@ -283,17 +285,19 @@ export class PurchaseIntegratedService {
       if (accessControl.success) {
         pinAccessGranted = true;
 
-        const encryptedPin = await getCardEncryptedPin(db, transactionResult.cardId);
+        const cardDetails = await getCardDetails(db, transactionResult.cardId);
 
-        if (!encryptedPin) {
+        if (!cardDetails) {
           throw createStructuredError(
             PurchaseErrorCode.CARD_NOT_FOUND,
             `Card not found after transaction: ${transactionResult.cardId}`,
           );
         }
 
+        serialNumber = cardDetails.serialNumber;
+
         try {
-          decryptedPin = await pinEncryptionService.decryptPIN(encryptedPin);
+          decryptedPin = await pinEncryptionService.decryptPIN(cardDetails.pinEncrypted);
         } catch (decryptError) {
           throw createStructuredError(
             PurchaseErrorCode.PIN_DECRYPTION_FAILED,
@@ -318,6 +322,9 @@ export class PurchaseIntegratedService {
           console.error("[Audit] Failed to log PIN access:", auditError);
         }
       } else {
+        // PIN already viewed — still fetch serial number for reference
+        const cardDetails = await getCardDetails(db, transactionResult.cardId);
+        serialNumber = cardDetails?.serialNumber ?? null;
         console.log(
           `[Purchase] PIN already viewed for card ${transactionResult.cardId}`,
         );
@@ -332,6 +339,7 @@ export class PurchaseIntegratedService {
         transactionId: transactionResult.transactionId.toString(),
         status: "completed",
         pin: decryptedPin,
+        serialNumber,
         amount: amount,
         commission: transactionResult.commissionAmount.toString(),
         timestamp: transactionResult.createdAt,
@@ -349,6 +357,7 @@ export class PurchaseIntegratedService {
           transactionId: transactionResult.transactionId.toString(),
           status: "completed",
           pin: null,
+          serialNumber: null,
           message: error.message,
           amount: amount,
           commission: transactionResult.commissionAmount.toString(),
@@ -366,6 +375,7 @@ export class PurchaseIntegratedService {
         transactionId: transactionResult.transactionId.toString(),
         status: "completed",
         pin: null,
+        serialNumber: null,
         message: "PIN retrieval failed. Please contact support.",
         amount: amount,
         commission: transactionResult.commissionAmount.toString(),

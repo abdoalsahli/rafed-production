@@ -63,6 +63,7 @@ export const purchaseRouter = router({
           transactionId: response.transactionId,
           status: response.status,
           pin: response.pin,
+          serialNumber: response.serialNumber,
           amount: response.amount,
           commission: response.commission,
           timestamp: response.timestamp,
