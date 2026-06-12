@@ -1990,4 +1990,176 @@ export const providerRouter = router({
         });
       }
     }),
+
+  /**
+   * provider.generatePins
+   * Generate a batch of random PIN codes and store them directly — no CSV needed.
+   *
+   * Serial number modes:
+   *  - "auto"   : system generates SN-{batchId}-{0001..N}
+   *  - "custom" : user supplies startSerial + interval → startSerial, startSerial+interval, …
+   */
+  generatePins: protectedProcedure
+    .input(
+      z.object({
+        productId:    z.number().int().positive(),
+        count:        z.number().int().min(1).max(10000),
+        pinLength:    z.number().int().refine((n) => [8, 10, 12, 16].includes(n), {
+          message: "PIN length must be 8, 10, 12, or 16",
+        }),
+        prefix:       z.string().max(8).optional(),
+        serialMode:   z.enum(["auto", "custom"]),
+        startSerial:  z.number().int().min(0).optional(),
+        serialInterval: z.number().int().min(1).optional(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const providerId = await getProviderIdFromUser(ctx.user.id);
+      const rawDb = await getRawDb();
+      if (!rawDb) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+
+      // Verify product exists and belongs to this provider
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+
+      const product = await db.select().from(products).where(
+        and(eq(products.id, input.productId), eq(products.providerId, providerId))
+      ).limit(1);
+
+      if (product.length === 0) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Product not found" });
+      }
+
+      // Load existing PIN hashes and serial numbers for uniqueness checks
+      const conn = await rawDb.getConnection();
+      let existingPinHashes: Set<string> = new Set();
+      let existingSerials:   Set<string> = new Set();
+      try {
+        const [pinRows] = await conn.execute(
+          `SELECT pin_hash FROM cards WHERE provider_id = ? AND pin_hash IS NOT NULL`,
+          [providerId]
+        ) as any[];
+        (pinRows as any[]).forEach((r: any) => r.pin_hash && existingPinHashes.add(r.pin_hash));
+
+        const [snRows] = await conn.execute(
+          `SELECT serial_number FROM cards WHERE provider_id = ? AND serial_number IS NOT NULL`,
+          [providerId]
+        ) as any[];
+        (snRows as any[]).forEach((r: any) => r.serial_number && existingSerials.add(r.serial_number));
+      } finally {
+        conn.release();
+      }
+
+      // Create the batch record first so we have its ID for auto serial numbers
+      const batchConn = await rawDb.getConnection();
+      let batchId: number;
+      try {
+        const [result] = await batchConn.execute(
+          `INSERT INTO card_batches (provider_id, filename, upload_status, total_cards, processed_cards, failed_cards, uploaded_by)
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          [providerId, `generated-batch-${Date.now()}`, "processing", input.count, 0, 0, ctx.user.id]
+        ) as any[];
+        batchId = result.insertId;
+      } finally {
+        batchConn.release();
+      }
+
+      // Generate PINs and serial numbers
+      const prefix      = input.prefix ?? "";
+      const pinLength   = input.pinLength;
+      const startSerial = input.startSerial ?? 1;
+      const interval    = input.serialInterval ?? 1;
+
+      const generatedCards: Array<{ pin: string; serial: string }> = [];
+      const seenPins:    Set<string> = new Set();
+      const seenSerials: Set<string> = new Set();
+      let attempts = 0;
+      const MAX_ATTEMPTS = input.count * 10;
+
+      while (generatedCards.length < input.count && attempts < MAX_ATTEMPTS) {
+        attempts++;
+
+        // Generate random numeric PIN
+        let pin = prefix;
+        const digitsNeeded = pinLength - prefix.length;
+        if (digitsNeeded <= 0) {
+          throw new TRPCError({ code: "BAD_REQUEST", message: "Prefix is too long for the selected PIN length" });
+        }
+        for (let d = 0; d < digitsNeeded; d++) {
+          pin += Math.floor(Math.random() * 10).toString();
+        }
+
+        // Skip if duplicate PIN
+        const pinHash = hashPin(pin);
+        if (seenPins.has(pin) || existingPinHashes.has(pinHash)) continue;
+
+        // Determine serial number
+        const idx = generatedCards.length;
+        const serial = input.serialMode === "auto"
+          ? `SN-${batchId}-${String(idx + 1).padStart(4, "0")}`
+          : String(startSerial + idx * interval);
+
+        // Skip if duplicate serial
+        if (seenSerials.has(serial) || existingSerials.has(serial)) {
+          if (input.serialMode === "custom") {
+            // Custom serials are deterministic — if one collides the whole batch would, fail early
+            throw new TRPCError({
+              code: "CONFLICT",
+              message: `Serial number ${serial} already exists. Choose a different start point or interval.`,
+            });
+          }
+          continue;
+        }
+
+        seenPins.add(pin);
+        seenSerials.add(serial);
+        generatedCards.push({ pin, serial });
+      }
+
+      if (generatedCards.length < input.count) {
+        // Clean up the batch record we created
+        const cleanConn = await rawDb.getConnection();
+        try { await cleanConn.execute(`DELETE FROM card_batches WHERE id = ?`, [batchId]); }
+        finally { cleanConn.release(); }
+
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: `Could only generate ${generatedCards.length} unique PINs out of ${input.count} requested. Try a longer PIN length or smaller count.`,
+        });
+      }
+
+      // Encrypt and insert cards
+      let insertedCount = 0;
+      for (const { pin, serial } of generatedCards) {
+        const encryptedPin = await pinEncryptionService.encryptPIN(pin);
+        const pinHash      = hashPin(pin);
+        const insertConn   = await rawDb.getConnection();
+        try {
+          await insertConn.execute(
+            `INSERT INTO cards (provider_id, product_id, batch_id, pin_encrypted, pin_hash, serial_number, status)
+             VALUES (?, ?, ?, ?, ?, ?, 'AVAILABLE')`,
+            [providerId, input.productId, batchId, encryptedPin, pinHash, serial]
+          );
+          insertedCount++;
+        } finally {
+          insertConn.release();
+        }
+      }
+
+      // Mark batch complete
+      await db.update(cardBatches).set({
+        processedCards: insertedCount,
+        uploadStatus: "completed",
+      }).where(eq(cardBatches.id, batchId));
+
+      return {
+        success: true,
+        batchId,
+        insertedCount,
+        productName: product[0].name,
+        serialMode: input.serialMode,
+        firstSerial: generatedCards[0]?.serial,
+        lastSerial:  generatedCards[generatedCards.length - 1]?.serial,
+      };
+    }),
 });

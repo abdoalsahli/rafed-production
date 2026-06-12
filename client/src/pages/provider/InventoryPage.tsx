@@ -1,12 +1,19 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, BarChart3 } from 'lucide-react';
+import { RefreshCw, BarChart3, Wand2 } from 'lucide-react';
 import { useInventory } from '@/hooks/data/useInventory';
 import { InventoryTable } from '@/components/provider/InventoryTable';
+import { GeneratePinsModal } from '@/components/provider/GeneratePinsModal';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { trpc } from '@/lib/trpc';
 
 export const InventoryPage: React.FC = () => {
-  const { inventory, isLoading, isRefreshing, error, handleRefresh } = useInventory();
+  const { inventory, isLoading, isRefreshing, error, handleRefresh, refetch } = useInventory();
+  const [showGenerateModal, setShowGenerateModal] = useState(false);
+
+  const { data: productsData } = trpc.provider.getProducts.useQuery();
+  const products = (productsData?.products ?? []).map((p: any) => ({ id: p.id, name: p.name }));
 
   return (
     <div className="p-6 md:p-8 space-y-6">
@@ -16,15 +23,24 @@ export const InventoryPage: React.FC = () => {
         title="إدارة المخزون"
         subtitle="استعرض المنتجات والبطاقات المتاحة"
         actions={
-          <Button
-            onClick={handleRefresh}
-            disabled={isRefreshing || isLoading}
-            variant="outline"
-            className="gap-1.5"
-          >
-            <RefreshCw size={15} className={isRefreshing ? 'animate-spin' : ''} />
-            تحديث
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={() => setShowGenerateModal(true)}
+              className="gap-1.5 bg-[#00236f] hover:bg-[#1e3a8a] text-white"
+            >
+              <Wand2 size={15} />
+              توليد بطاقات
+            </Button>
+            <Button
+              onClick={handleRefresh}
+              disabled={isRefreshing || isLoading}
+              variant="outline"
+              className="gap-1.5"
+            >
+              <RefreshCw size={15} className={isRefreshing ? 'animate-spin' : ''} />
+              تحديث
+            </Button>
+          </div>
         }
       />
 
@@ -35,6 +51,15 @@ export const InventoryPage: React.FC = () => {
             فشل تحميل المخزون. يرجى المحاولة مجدداً.
           </p>
         </div>
+      )}
+
+      {/* ── Generate Pins Modal ─────────────────────────────────────────── */}
+      {showGenerateModal && (
+        <GeneratePinsModal
+          products={products}
+          onClose={() => setShowGenerateModal(false)}
+          onSuccess={() => { refetch(); }}
+        />
       )}
 
       {/* ── Inventory table ─────────────────────────────────────────────── */}
