@@ -63,6 +63,20 @@ async function startServer() {
   app.use(cors({ origin: "https://rafed-backend-production-0dc6.up.railway.app", credentials: true }));
   // Health check
   app.get('/health', (_req, res) => { res.json({ status: 'ok' }); });
+  // Timezone debug (temporary)
+  app.get('/debug-tz', async (_req, res) => {
+    const { getRawDb } = await import('../db');
+    const pool = await getRawDb();
+    const [rows]: any = pool ? await pool.query('SELECT NOW() as db_now, UTC_TIMESTAMP() as utc_now, @@global.time_zone as tz') : [[{}]];
+    res.json({
+      serverTZ: process.env.TZ || 'not set',
+      serverNow: new Date().toISOString(),
+      serverOffset: new Date().getTimezoneOffset(),
+      dbNow: rows[0]?.db_now,
+      dbUtcNow: rows[0]?.utc_now,
+      dbTZ: rows[0]?.tz,
+    });
+  });
   // Configure body parser with larger size limit for file uploads
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
