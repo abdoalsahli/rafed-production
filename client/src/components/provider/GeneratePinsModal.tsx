@@ -18,8 +18,6 @@ interface GeneratePinsModalProps {
 type SerialMode = 'auto' | 'custom';
 type Step       = 'form' | 'success';
 
-const PIN_LENGTHS = [8, 10, 12, 16];
-
 const inputCls =
   'w-full px-4 py-2.5 rounded-lg bg-white border border-[#e2e8f0] ' +
   'focus:border-[#00236f] focus:ring-1 focus:ring-[#00236f] ' +
@@ -115,15 +113,15 @@ export function GeneratePinsModal({ products, onClose, onSuccess }: GeneratePins
               </div>
               <div>
                 <label className="block text-xs font-medium text-[#444651] mb-1.5">طول رقم PIN *</label>
-                <select
+                <input
+                  type="number"
+                  min={4}
+                  max={32}
                   value={pinLength}
                   onChange={(e) => setPinLength(Number(e.target.value))}
                   className={inputCls}
-                >
-                  {PIN_LENGTHS.map((l) => (
-                    <option key={l} value={l}>{l} أرقام</option>
-                  ))}
-                </select>
+                />
+                <p className="text-xs text-[#94a3b8] mt-1">بين 4 و 32 رقمًا</p>
               </div>
             </div>
 

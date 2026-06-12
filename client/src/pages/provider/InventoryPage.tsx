@@ -12,7 +12,7 @@ export const InventoryPage: React.FC = () => {
   const { inventory, isLoading, isRefreshing, error, handleRefresh, refetch } = useInventory();
   const [showGenerateModal, setShowGenerateModal] = useState(false);
 
-  const { data: productsData } = trpc.provider.getProducts.useQuery();
+  const { data: productsData } = trpc.provider.listProducts.useQuery({});
   const products = (productsData?.products ?? []).map((p: any) => ({ id: p.id, name: p.name }));
 
   return (

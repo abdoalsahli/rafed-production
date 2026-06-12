@@ -2004,9 +2004,7 @@ export const providerRouter = router({
       z.object({
         productId:    z.number().int().positive(),
         count:        z.number().int().min(1).max(10000),
-        pinLength:    z.number().int().refine((n) => [8, 10, 12, 16].includes(n), {
-          message: "PIN length must be 8, 10, 12, or 16",
-        }),
+        pinLength:    z.number().int().min(4).max(32),
         prefix:       z.string().max(8).optional(),
         serialMode:   z.enum(["auto", "custom"]),
         startSerial:  z.number().int().min(0).optional(),
@@ -2031,9 +2029,11 @@ export const providerRouter = router({
       }
 
       // Load existing PIN hashes and serial numbers for uniqueness checks
+      // Also find the max numeric serial for auto-increment mode
       const conn = await rawDb.getConnection();
       let existingPinHashes: Set<string> = new Set();
       let existingSerials:   Set<string> = new Set();
+      let maxNumericSerial  = 0;
       try {
         const [pinRows] = await conn.execute(
           `SELECT pin_hash FROM cards WHERE provider_id = ? AND pin_hash IS NOT NULL`,
@@ -2045,7 +2045,13 @@ export const providerRouter = router({
           `SELECT serial_number FROM cards WHERE provider_id = ? AND serial_number IS NOT NULL`,
           [providerId]
         ) as any[];
-        (snRows as any[]).forEach((r: any) => r.serial_number && existingSerials.add(r.serial_number));
+        (snRows as any[]).forEach((r: any) => {
+          if (!r.serial_number) return;
+          existingSerials.add(r.serial_number);
+          // Track the largest purely-numeric serial for auto-increment
+          const asNum = parseInt(r.serial_number, 10);
+          if (!isNaN(asNum) && asNum > maxNumericSerial) maxNumericSerial = asNum;
+        });
       } finally {
         conn.release();
       }
@@ -2096,7 +2102,7 @@ export const providerRouter = router({
         // Determine serial number
         const idx = generatedCards.length;
         const serial = input.serialMode === "auto"
-          ? `SN-${batchId}-${String(idx + 1).padStart(4, "0")}`
+          ? String(maxNumericSerial + idx + 1)   // continues from the largest existing serial
           : String(startSerial + idx * interval);
 
         // Skip if duplicate serial
