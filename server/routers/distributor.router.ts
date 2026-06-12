@@ -335,7 +335,7 @@ export const distributorRouter = router({
       const pool = await getRawDb();
       const [rows]: any = await pool.query(
         `SELECT pr.id, pr.status, pr.card_id, pr.failure_reason,
-                c.pin_encrypted, c.pin_viewed,
+                c.pin_encrypted, c.pin_viewed, c.serial_number,
                 p.display_name, p.name AS product_name,
                 p.face_value, p.currency, p.price
          FROM purchase_requests pr
@@ -357,32 +357,33 @@ export const distributorRouter = router({
         currency: req.currency || "LYD",
       };
 
+      const serialNumber: string | null = req.serial_number ?? null;
+
       if (req.status === "PENDING" || req.status === "PROCESSING") {
-        return { ...base, status: req.status as "PENDING" | "PROCESSING", pin: null, failureReason: null };
+        return { ...base, status: req.status as "PENDING" | "PROCESSING", pin: null, serialNumber: null, failureReason: null };
       }
 
       if (req.status === "FAILED") {
-        return { ...base, status: "FAILED" as const, pin: null, failureReason: req.failure_reason || "Purchase failed" };
+        return { ...base, status: "FAILED" as const, pin: null, serialNumber: null, failureReason: req.failure_reason || "Purchase failed" };
       }
 
       // SUCCEEDED — decrypt PIN (one-time)
       if (!req.card_id || !req.pin_encrypted) {
-        return { ...base, status: "SUCCEEDED" as const, pin: null, failureReason: "Card data unavailable" };
+        return { ...base, status: "SUCCEEDED" as const, pin: null, serialNumber, failureReason: "Card data unavailable" };
       }
 
       // Guard: already viewed before this call (e.g. via webhook flow)
       if (Number(req.pin_viewed) === 1) {
-        return { ...base, status: "SUCCEEDED" as const, pin: null, failureReason: "PIN already retrieved" };
+        return { ...base, status: "SUCCEEDED" as const, pin: null, serialNumber, failureReason: "PIN already retrieved" };
       }
 
-      // Atomic one-time mark — use raw pool so affectedRows is correctly returned
-      // (Drizzle db.execute returns [OkPacket, ...] array, not OkPacket directly)
+      // Atomic one-time mark
       const [markResult]: any = await pool.query(
         "UPDATE cards SET pin_viewed = 1, updated_at = NOW() WHERE id = ? AND pin_viewed = 0",
         [req.card_id]
       );
       if (!markResult.affectedRows || markResult.affectedRows === 0) {
-        return { ...base, status: "SUCCEEDED" as const, pin: null, failureReason: "PIN already retrieved" };
+        return { ...base, status: "SUCCEEDED" as const, pin: null, serialNumber, failureReason: "PIN already retrieved" };
       }
 
       try {
@@ -393,10 +394,10 @@ export const distributorRouter = router({
           resourceId: req.card_id,
           metadata: { requestId: input.requestId, distributorId, source: "manual_purchase" },
         });
-        return { ...base, status: "SUCCEEDED" as const, pin, failureReason: null };
+        return { ...base, status: "SUCCEEDED" as const, pin, serialNumber, failureReason: null };
       } catch (err: any) {
         console.error("[getPurchaseResult] PIN decryption failed:", err);
-        return { ...base, status: "SUCCEEDED" as const, pin: null, failureReason: "PIN decryption failed" };
+        return { ...base, status: "SUCCEEDED" as const, pin: null, serialNumber, failureReason: "PIN decryption failed" };
       }
     }),
 

@@ -43,6 +43,7 @@ interface PurchasedCard {
   requestId: number;
   status: CardStatus;
   pin: string | null;
+  serialNumber: string | null;
   error: string | null;
   pinRevealed: boolean;
   copied: boolean;
@@ -57,19 +58,18 @@ function CardPoller({
   onResult,
 }: {
   requestId: number;
-  onResult: (id: number, status: CardStatus, pin: string | null, error: string | null) => void;
+  onResult: (id: number, status: CardStatus, pin: string | null, serialNumber: string | null, error: string | null) => void;
 }) {
   const { data } = trpc.distributor.getPurchaseResult.useQuery(
     { requestId },
     {
-      // React Query v5 refetchInterval callback receives the query object
       refetchInterval: (query) => {
         const d = query.state.data;
         if (!d || d.status === 'PENDING' || d.status === 'PROCESSING') return 800;
         return false;
       },
-      staleTime: Infinity,          // Never treat cached PIN as stale
-      refetchOnWindowFocus: false,  // Don't re-fetch on tab focus
+      staleTime: Infinity,
+      refetchOnWindowFocus: false,
       retry: 2,
     }
   );
@@ -80,6 +80,7 @@ function CardPoller({
         requestId,
         data.status,
         data.pin ?? null,
+        (data as any).serialNumber ?? null,
         data.failureReason ?? null
       );
     }
@@ -130,9 +131,9 @@ export function DistributorPurchase() {
   // ── Handlers ───────────────────────────────────────────────────────────────
 
   const handleCardResult = useCallback(
-    (requestId: number, status: CardStatus, pin: string | null, error: string | null) => {
+    (requestId: number, status: CardStatus, pin: string | null, serialNumber: string | null, error: string | null) => {
       setPurchasedCards(prev =>
-        prev.map(c => c.requestId === requestId ? { ...c, status, pin, error } : c)
+        prev.map(c => c.requestId === requestId ? { ...c, status, pin, serialNumber, error } : c)
       );
     },
     []
@@ -164,13 +165,14 @@ export function DistributorPurchase() {
         }
 
         cards.push({
-          seq:         i + 1,
-          requestId:   result.requestId as number,
-          status:      (result.status as CardStatus) || 'PENDING',
-          pin:         null,
-          error:       null,
-          pinRevealed: false,
-          copied:      false,
+          seq:          i + 1,
+          requestId:    result.requestId as number,
+          status:       (result.status as CardStatus) || 'PENDING',
+          pin:          null,
+          serialNumber: null,
+          error:        null,
+          pinRevealed:  false,
+          copied:       false,
         });
       }
 
@@ -547,9 +549,9 @@ function CardResultRow({
   onCopyPin,
   onTogglePin,
 }: {
-  card: PurchasedCard;
-  onCopyPin: (id: number, pin: string) => void;
-  onTogglePin: (id: number) => void;
+  card:         PurchasedCard;
+  onCopyPin:    (id: number, pin: string) => void;
+  onTogglePin:  (id: number) => void;
 }) {
   const isPending = card.status === 'PENDING' || card.status === 'PROCESSING';
 
@@ -595,6 +597,16 @@ function CardResultRow({
           )}
         </Badge>
       </div>
+
+      {/* Serial number */}
+      {card.status === 'SUCCEEDED' && card.serialNumber && (
+        <div className="mt-2 flex items-center gap-2">
+          <span className="text-xs font-semibold text-[#444651]">الرقم التسلسلي:</span>
+          <span className="num font-mono text-sm font-bold text-[#0b1c30] bg-white border border-[#e2e8f0] rounded px-2 py-0.5 select-all">
+            {card.serialNumber}
+          </span>
+        </div>
+      )}
 
       {/* PIN display */}
       {card.status === 'SUCCEEDED' && card.pin && (
