@@ -63,10 +63,10 @@ export function GeneratePinsModal({ products, onClose, onSuccess }: GeneratePins
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl border border-[#e2e8f0] w-full max-w-lg shadow-xl">
+      <div className="bg-white rounded-xl border border-[#e2e8f0] w-full max-w-lg shadow-xl flex flex-col max-h-[90vh]">
 
         {/* Header */}
-        <div className="px-6 py-4 border-b border-[#e2e8f0] flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-[#e2e8f0] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-2">
             <Wand2 size={18} className="text-[#00236f]" />
             <h2 className="text-base font-bold text-[#0b1c30]">توليد بطاقات تلقائيًا</h2>
@@ -81,7 +81,7 @@ export function GeneratePinsModal({ products, onClose, onSuccess }: GeneratePins
 
         {/* Body */}
         {step === 'form' ? (
-          <div className="p-6 space-y-5">
+          <div className="overflow-y-auto flex-1 p-6 space-y-5">
 
             {/* Product */}
             <div>
@@ -213,35 +213,34 @@ export function GeneratePinsModal({ products, onClose, onSuccess }: GeneratePins
               </div>
             )}
 
-            {/* Actions */}
-            <div className="flex gap-3 pt-2 border-t border-[#e2e8f0]">
-              <button
-                onClick={onClose}
-                className="flex-1 px-4 py-2.5 rounded-lg border border-[#e2e8f0] text-[#0b1c30] text-sm font-medium hover:bg-[#f8f9ff] transition-colors"
-              >
-                إلغاء
-              </button>
-              <button
-                onClick={handleSubmit}
-                disabled={generateMutation.isPending || !productId}
-                className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#00236f] text-white text-sm font-semibold hover:bg-[#1e3a8a] transition-colors disabled:opacity-50"
-              >
-                {generateMutation.isPending ? (
-                  <>
-                    <Loader2 size={15} className="animate-spin" />
-                    جاري التوليد…
-                  </>
-                ) : (
-                  <>
-                    <Wand2 size={15} />
-                    توليد {formatCount(count)} بطاقة
-                  </>
-                )}
-              </button>
-            </div>
           </div>
-        ) : (
-          /* Success screen */
+        ) : null}
+
+        {/* Sticky footer — actions (form step) */}
+        {step === 'form' && (
+          <div className="px-6 py-4 border-t border-[#e2e8f0] flex gap-3 shrink-0">
+            <button
+              onClick={onClose}
+              className="flex-1 px-4 py-2.5 rounded-lg border border-[#e2e8f0] text-[#0b1c30] text-sm font-medium hover:bg-[#f8f9ff] transition-colors"
+            >
+              إلغاء
+            </button>
+            <button
+              onClick={handleSubmit}
+              disabled={generateMutation.isPending || !productId}
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-[#00236f] text-white text-sm font-semibold hover:bg-[#1e3a8a] transition-colors disabled:opacity-50"
+            >
+              {generateMutation.isPending ? (
+                <><Loader2 size={15} className="animate-spin" />جاري التوليد…</>
+              ) : (
+                <><Wand2 size={15} />توليد {formatCount(count)} بطاقة</>
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Success screen */}
+        {step === 'success' && (
           <div className="p-8 flex flex-col items-center text-center gap-4">
             <div className="w-14 h-14 rounded-full bg-[#ccfbf1] flex items-center justify-center">
               <CheckCircle size={28} className="text-[#0f766e]" />
@@ -250,7 +249,6 @@ export function GeneratePinsModal({ products, onClose, onSuccess }: GeneratePins
               <h3 className="text-lg font-bold text-[#0b1c30]">تم توليد البطاقات بنجاح</h3>
               <p className="text-sm text-[#444651] mt-1">{result?.productName}</p>
             </div>
-
             <div className="w-full grid grid-cols-2 gap-3 text-right">
               {[
                 { label: 'البطاقات المولّدة', value: formatCount(result?.insertedCount) },
@@ -264,7 +262,6 @@ export function GeneratePinsModal({ products, onClose, onSuccess }: GeneratePins
                 </div>
               ))}
             </div>
-
             <button
               onClick={onClose}
               className="w-full px-4 py-2.5 rounded-lg bg-[#00236f] text-white text-sm font-semibold hover:bg-[#1e3a8a] transition-colors"
