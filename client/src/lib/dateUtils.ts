@@ -5,8 +5,8 @@
  * Locale: ar-LY-u-nu-latn — Arabic text (Libyan), Western/Latin digits (0-9).
  */
 
-const TZ   = 'Etc/GMT-2'; // Fixed UTC+2, never affected by DST database changes
-const AR   = 'ar-LY-u-nu-latn'; // Arabic labels, Western numerals
+// No explicit TZ — use the browser's local timezone (Libya = UTC+2)
+const AR = 'ar-LY-u-nu-latn'; // Arabic labels, Western numerals
 
 /**
  * "1 يون، 10:30 ص" — used in transaction/event lists where the year is implied.
@@ -14,7 +14,6 @@ const AR   = 'ar-LY-u-nu-latn'; // Arabic labels, Western numerals
 export function formatDateTimeShort(date: string | Date | null | undefined): string {
   if (!date) return '—';
   return new Date(date).toLocaleString(AR, {
-    timeZone: TZ,
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
@@ -28,7 +27,6 @@ export function formatDateTimeShort(date: string | Date | null | undefined): str
 export function formatDateTime(date: string | Date | null | undefined): string {
   if (!date) return '—';
   return new Date(date).toLocaleString(AR, {
-    timeZone: TZ,
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -43,7 +41,6 @@ export function formatDateTime(date: string | Date | null | undefined): string {
 export function formatDateOnly(date: string | Date | null | undefined): string {
   if (!date) return '—';
   return new Date(date).toLocaleDateString(AR, {
-    timeZone: TZ,
     year: 'numeric',
     month: 'short',
     day: 'numeric',
@@ -56,7 +53,6 @@ export function formatDateOnly(date: string | Date | null | undefined): string {
 export function formatTimeOnly(date: string | Date | null | undefined): string {
   if (!date) return '—';
   return new Date(date).toLocaleTimeString(AR, {
-    timeZone: TZ,
     hour: '2-digit',
     minute: '2-digit',
   });
