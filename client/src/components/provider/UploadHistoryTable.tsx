@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { formatDateOnly } from '@/lib/dateUtils';
+import { formatCount } from '@/lib/numberUtils';
 import {
   Table,
   TableBody,
@@ -104,9 +105,9 @@ export function UploadHistoryTable({ uploads, isLoading }: UploadHistoryTablePro
                     {STATUS_LABELS[upload.status] || upload.status}
                   </Badge>
                 </TableCell>
-                <TableCell className="num text-[#0b1c30]">{upload.totalCards}</TableCell>
-                <TableCell className="num font-semibold text-[#0f766e]">{upload.successRecords}</TableCell>
-                <TableCell className="num font-semibold text-[#b91c1c]">{upload.failedRecords}</TableCell>
+                <TableCell className="num text-[#0b1c30]">{formatCount(upload.totalCards)}</TableCell>
+                <TableCell className="num font-semibold text-[#0f766e]">{formatCount(upload.successRecords)}</TableCell>
+                <TableCell className="num font-semibold text-[#b91c1c]">{formatCount(upload.failedRecords)}</TableCell>
               </TableRow>
             ))
           ) : (
