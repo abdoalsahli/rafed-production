@@ -2168,4 +2168,118 @@ export const providerRouter = router({
         lastSerial:  generatedCards[generatedCards.length - 1]?.serial,
       };
     }),
+
+  /**
+   * provider.validateInventory
+   * Scans the provider's card inventory for:
+   *  1. Duplicate PIN hashes (same PIN stored more than once)
+   *  2. Duplicate serial numbers (same serial on multiple cards)
+   * Returns counts, examples, and per-product breakdown.
+   */
+  validateInventory: protectedProcedure.query(async ({ ctx }) => {
+    const providerId = await getProviderIdFromUser(ctx.user.id);
+    const rawDb = await getRawDb();
+    if (!rawDb) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+
+    const conn = await rawDb.getConnection();
+    try {
+      // Total cards
+      const [totalRows] = await conn.execute(
+        `SELECT COUNT(*) as total FROM cards WHERE provider_id = ?`,
+        [providerId]
+      ) as any[];
+      const totalCards = totalRows[0]?.total ?? 0;
+
+      // Duplicate PIN hashes
+      const [dupPinRows] = await conn.execute(
+        `SELECT pin_hash, COUNT(*) as cnt
+         FROM cards
+         WHERE provider_id = ? AND pin_hash IS NOT NULL
+         GROUP BY pin_hash
+         HAVING cnt > 1
+         ORDER BY cnt DESC
+         LIMIT 20`,
+        [providerId]
+      ) as any[];
+
+      // Get card IDs for duplicate PINs (for display)
+      const dupPinExamples: Array<{ pinHash: string; count: number; cardIds: number[] }> = [];
+      for (const row of (dupPinRows as any[])) {
+        const [idRows] = await conn.execute(
+          `SELECT id FROM cards WHERE provider_id = ? AND pin_hash = ? LIMIT 5`,
+          [providerId, row.pin_hash]
+        ) as any[];
+        dupPinExamples.push({
+          pinHash: row.pin_hash.substring(0, 12) + '…',
+          count:   row.cnt,
+          cardIds: (idRows as any[]).map((r: any) => r.id),
+        });
+      }
+
+      // Duplicate serial numbers
+      const [dupSnRows] = await conn.execute(
+        `SELECT serial_number, COUNT(*) as cnt
+         FROM cards
+         WHERE provider_id = ? AND serial_number IS NOT NULL
+         GROUP BY serial_number
+         HAVING cnt > 1
+         ORDER BY cnt DESC
+         LIMIT 20`,
+        [providerId]
+      ) as any[];
+
+      const dupSnExamples: Array<{ serial: string; count: number; cardIds: number[] }> = [];
+      for (const row of (dupSnRows as any[])) {
+        const [idRows] = await conn.execute(
+          `SELECT id FROM cards WHERE provider_id = ? AND serial_number = ? LIMIT 5`,
+          [providerId, row.serial_number]
+        ) as any[];
+        dupSnExamples.push({
+          serial:  row.serial_number,
+          count:   row.cnt,
+          cardIds: (idRows as any[]).map((r: any) => r.id),
+        });
+      }
+
+      // Cards with no serial number
+      const [noSnRows] = await conn.execute(
+        `SELECT COUNT(*) as cnt FROM cards WHERE provider_id = ? AND (serial_number IS NULL OR serial_number = '')`,
+        [providerId]
+      ) as any[];
+      const cardsWithoutSerial = noSnRows[0]?.cnt ?? 0;
+
+      // Per-product breakdown
+      const [productRows] = await conn.execute(
+        `SELECT p.name as productName, p.id as productId,
+                COUNT(c.id) as totalCards,
+                SUM(CASE WHEN c.status = 'AVAILABLE' THEN 1 ELSE 0 END) as available,
+                SUM(CASE WHEN c.status = 'SOLD' THEN 1 ELSE 0 END) as sold
+         FROM cards c
+         JOIN products p ON c.product_id = p.id
+         WHERE c.provider_id = ?
+         GROUP BY p.id, p.name
+         ORDER BY totalCards DESC`,
+        [providerId]
+      ) as any[];
+
+      return {
+        totalCards,
+        duplicatePins:    (dupPinRows as any[]).length,
+        duplicateSerials: (dupSnRows as any[]).length,
+        cardsWithoutSerial,
+        dupPinExamples,
+        dupSnExamples,
+        productBreakdown: (productRows as any[]).map((r: any) => ({
+          productId:   r.productId,
+          productName: r.productName,
+          totalCards:  r.totalCards,
+          available:   r.available,
+          sold:        r.sold,
+        })),
+        isClean: (dupPinRows as any[]).length === 0 && (dupSnRows as any[]).length === 0,
+      };
+    } finally {
+      conn.release();
+    }
+  }),
 });

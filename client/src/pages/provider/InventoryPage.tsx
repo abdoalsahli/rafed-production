@@ -1,16 +1,18 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { RefreshCw, BarChart3, Wand2 } from 'lucide-react';
+import { RefreshCw, BarChart3, Wand2, ShieldCheck } from 'lucide-react';
 import { useInventory } from '@/hooks/data/useInventory';
 import { InventoryTable } from '@/components/provider/InventoryTable';
 import { GeneratePinsModal } from '@/components/provider/GeneratePinsModal';
+import { InventoryValidationModal } from '@/components/provider/InventoryValidationModal';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { trpc } from '@/lib/trpc';
 
 export const InventoryPage: React.FC = () => {
   const { inventory, isLoading, isRefreshing, error, handleRefresh, refetch } = useInventory();
-  const [showGenerateModal, setShowGenerateModal] = useState(false);
+  const [showGenerateModal,    setShowGenerateModal]    = useState(false);
+  const [showValidationModal,  setShowValidationModal]  = useState(false);
 
   const { data: productsData } = trpc.provider.listProducts.useQuery({});
   const products = (productsData?.products ?? []).map((p: any) => ({ id: p.id, name: p.name }));
@@ -32,6 +34,14 @@ export const InventoryPage: React.FC = () => {
               توليد بطاقات
             </Button>
             <Button
+              onClick={() => setShowValidationModal(true)}
+              variant="outline"
+              className="gap-1.5"
+            >
+              <ShieldCheck size={15} />
+              فحص المخزون
+            </Button>
+            <Button
               onClick={handleRefresh}
               disabled={isRefreshing || isLoading}
               variant="outline"
@@ -51,6 +61,11 @@ export const InventoryPage: React.FC = () => {
             فشل تحميل المخزون. يرجى المحاولة مجدداً.
           </p>
         </div>
+      )}
+
+      {/* ── Validation Modal ────────────────────────────────────────────── */}
+      {showValidationModal && (
+        <InventoryValidationModal onClose={() => setShowValidationModal(false)} />
       )}
 
       {/* ── Generate Pins Modal ─────────────────────────────────────────── */}
