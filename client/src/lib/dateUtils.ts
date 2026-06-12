@@ -5,7 +5,7 @@
  * Locale: ar-LY-u-nu-latn — Arabic text (Libyan), Western/Latin digits (0-9).
  */
 
-const TZ   = 'Africa/Tripoli'; // Libya UTC+2, no DST
+const TZ   = 'Etc/GMT-2'; // Fixed UTC+2, never affected by DST database changes
 const AR   = 'ar-LY-u-nu-latn'; // Arabic labels, Western numerals
 
 /**
