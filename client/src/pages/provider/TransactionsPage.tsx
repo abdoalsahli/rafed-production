@@ -62,6 +62,11 @@ export default function ProviderTransactionsPage() {
     startDate,
     endDate,
     distributorId: selectedDistributor !== 'all' ? parseInt(selectedDistributor) : undefined,
+    productId:     selectedProduct     !== 'all' ? parseInt(selectedProduct)     : undefined,
+    status:        selectedStatus      !== 'all' ? (selectedStatus as any)       : undefined,
+    minAmount,
+    maxAmount,
+    searchQuery:   searchQuery || undefined,
   });
 
   const { data: distributors } = trpc.providerTransactions.getDistributors.useQuery();

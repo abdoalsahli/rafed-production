@@ -126,9 +126,14 @@ export const providerTransactionsRouter = router({
   summary: protectedProcedure
     .input(
       z.object({
-        startDate: z.date().optional(),
-        endDate: z.date().optional(),
+        startDate:     z.date().optional(),
+        endDate:       z.date().optional(),
         distributorId: z.number().int().optional(),
+        productId:     z.number().int().optional(),
+        status:        z.enum(['completed', 'pending', 'failed', 'refunded']).optional(),
+        minAmount:     z.number().optional(),
+        maxAmount:     z.number().optional(),
+        searchQuery:   z.string().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -150,8 +155,25 @@ export const providerTransactionsRouter = router({
         if (input.distributorId) {
           conditions.push(eq(transactions.distributorId, input.distributorId));
         }
+        if (input.productId) {
+          conditions.push(eq(transactions.productId, input.productId));
+        }
+        if (input.minAmount !== undefined) {
+          conditions.push(gte(transactions.amount, String(input.minAmount)));
+        }
+        if (input.maxAmount !== undefined) {
+          conditions.push(lte(transactions.amount, String(input.maxAmount)));
+        }
+        if (input.searchQuery) {
+          conditions.push(like(transactions.idempotencyKey, `%${input.searchQuery}%`));
+        }
 
-        // Get summary statistics for completed transactions
+        // Apply status filter if set; otherwise default to completed for revenue totals
+        const statusFilter = input.status
+          ? eq(transactions.status, input.status)
+          : eq(transactions.status, "completed");
+
+        // Get summary statistics
         const summaryData = await db
           .select({
             totalSales: sum(transactions.amount),
@@ -159,9 +181,9 @@ export const providerTransactionsRouter = router({
             successfulCount: count(transactions.id),
           })
           .from(transactions)
-          .where(and(and(...conditions), eq(transactions.status, "completed")));
+          .where(and(and(...conditions), statusFilter));
 
-        // Get failed transaction count
+        // Get failed transaction count (unaffected by status filter so it's always correct)
         const failedData = await db
           .select({
             failedCount: count(transactions.id),

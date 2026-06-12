@@ -9,7 +9,7 @@ import {
   monitoringAlerts,
   providerDistributorRelationships,
 } from "../../drizzle/schema";
-import { eq, and, desc, sum, count, min, max, like } from "drizzle-orm";
+import { eq, and, desc, sum, count, min, max, like, gte, lte, sql } from "drizzle-orm";
 import Decimal from "decimal.js";
 import { z } from "zod";
 import { getDistributorIdFromUser } from "../utils/org-lookup";
@@ -155,9 +155,14 @@ export const financialRouter = router({
   ledgerHistory: protectedProcedure
     .input(
       z.object({
-        limit: z.number().min(1).max(100).default(50),
-        offset: z.number().min(0).default(0),
+        limit:      z.number().min(1).max(100).default(50),
+        offset:     z.number().min(0).default(0),
         providerId: z.number().optional(),
+        dateFrom:   z.string().optional(),
+        dateTo:     z.string().optional(),
+        amountMin:  z.number().optional(),
+        amountMax:  z.number().optional(),
+        searchTerm: z.string().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -186,6 +191,23 @@ export const financialRouter = router({
 
         if (input.providerId) {
           whereConditions.push(eq(providerDistributorLedger.providerId, input.providerId));
+        }
+        if (input.dateFrom) {
+          whereConditions.push(gte(providerDistributorLedger.createdAt, new Date(input.dateFrom)));
+        }
+        if (input.dateTo) {
+          const end = new Date(input.dateTo);
+          end.setHours(23, 59, 59, 999);
+          whereConditions.push(lte(providerDistributorLedger.createdAt, end));
+        }
+        if (input.amountMin !== undefined) {
+          whereConditions.push(gte(providerDistributorLedger.amount, String(input.amountMin)));
+        }
+        if (input.amountMax !== undefined) {
+          whereConditions.push(lte(providerDistributorLedger.amount, String(input.amountMax)));
+        }
+        if (input.searchTerm) {
+          whereConditions.push(like(providerDistributorLedger.referenceId, `%${input.searchTerm}%`));
         }
 
         // Only show purchase entries — commissions are internal accounting,
@@ -286,6 +308,11 @@ export const financialRouter = router({
     .input(
       z.object({
         providerId: z.number().optional(),
+        dateFrom:   z.string().optional(),
+        dateTo:     z.string().optional(),
+        amountMin:  z.number().optional(),
+        amountMax:  z.number().optional(),
+        searchTerm: z.string().optional(),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -301,6 +328,23 @@ export const financialRouter = router({
         const whereConditions = [eq(providerDistributorLedger.distributorId, distributorId)];
         if (input.providerId) {
           whereConditions.push(eq(providerDistributorLedger.providerId, input.providerId));
+        }
+        if (input.dateFrom) {
+          whereConditions.push(gte(providerDistributorLedger.createdAt, new Date(input.dateFrom)));
+        }
+        if (input.dateTo) {
+          const end = new Date(input.dateTo);
+          end.setHours(23, 59, 59, 999);
+          whereConditions.push(lte(providerDistributorLedger.createdAt, end));
+        }
+        if (input.amountMin !== undefined) {
+          whereConditions.push(gte(providerDistributorLedger.amount, String(input.amountMin)));
+        }
+        if (input.amountMax !== undefined) {
+          whereConditions.push(lte(providerDistributorLedger.amount, String(input.amountMax)));
+        }
+        if (input.searchTerm) {
+          whereConditions.push(like(providerDistributorLedger.referenceId, `%${input.searchTerm}%`));
         }
 
         // Run both aggregations in parallel

@@ -40,16 +40,25 @@ export const TransactionsPage: React.FC = () => {
   const exportMutation = trpc.export.ledgerHistoryCSV.useMutation();
 
   /* ── queries ─────────────────────────────────────────────────────────── */
+  const sharedFilters = {
+    providerId: filters.providerId,
+    dateFrom:   filters.dateFrom,
+    dateTo:     filters.dateTo,
+    amountMin:  filters.amountMin,
+    amountMax:  filters.amountMax,
+    searchTerm: filters.searchTerm || undefined,
+  };
+
   const { data: ledgerData, isLoading: isLoadingLedger, error: ledgerError } =
     trpc.financial.ledgerHistory.useQuery(
-      { limit: PAGE_SIZE, offset: currentPage * PAGE_SIZE, providerId: filters.providerId },
+      { limit: PAGE_SIZE, offset: currentPage * PAGE_SIZE, ...sharedFilters },
       { enabled: isAuthenticated && !authLoading },
     );
 
-  /* Aggregate totals across ALL pages (not just current page) */
+  /* Aggregate totals matching the active filters */
   const { data: ledgerSummary } =
     trpc.financial.ledgerSummary.useQuery(
-      { providerId: filters.providerId },
+      { ...sharedFilters },
       { enabled: isAuthenticated && !authLoading },
     );
 
