@@ -34,14 +34,22 @@ export default function OrganizationsPage() {
   };
 
   const handleCreateSubmit = async (data: any) => {
-    await handleCreate(data);
-    setIsCreateOpen(false);
+    try {
+      await handleCreate(data);
+      setIsCreateOpen(false);
+    } catch {
+      // error already shown via onError toast
+    }
   };
 
   const handleEditSubmit = async (data: any) => {
-    await handleUpdate(data);
-    setIsEditOpen(false);
-    setSelectedOrg(null);
+    try {
+      await handleUpdate(data);
+      setIsEditOpen(false);
+      setSelectedOrg(null);
+    } catch {
+      // error already shown via onError toast
+    }
   };
 
   return (

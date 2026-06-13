@@ -37,11 +37,12 @@ export function ProtectedRoute({ children, requiredRoles = [] }: ProtectedRouteP
 
     // Check role-based access
     if (requiredRoles.length > 0) {
-      // Admin users use user.role; org users use organizationType as their effective role
-      const rawRole = (user as any).role || 'user';
-      const effectiveRole = rawRole === 'admin'
+      const rawRole    = (user as any).role || 'user';
+      const orgType    = (user as any).organizationType;
+      // internal org users are platform admins
+      const effectiveRole = rawRole === 'admin' || orgType === 'internal'
         ? 'admin'
-        : ((user as any).organizationType || rawRole);
+        : (orgType || rawRole);
       if (!requiredRoles.includes(effectiveRole)) {
         setLocation('/unauthorized');
         return;
@@ -65,10 +66,11 @@ export function ProtectedRoute({ children, requiredRoles = [] }: ProtectedRouteP
   if ((user as any).status === 'PENDING') return <PendingActivationPage />;
   if ((user as any).status === 'SUSPENDED') return <SuspendedPage />;
 
-  const rawRole = (user as any).role || 'user';
-  const effectiveRole = rawRole === 'admin'
+  const rawRole    = (user as any).role || 'user';
+  const orgType    = (user as any).organizationType;
+  const effectiveRole = rawRole === 'admin' || orgType === 'internal'
     ? 'admin'
-    : ((user as any).organizationType || rawRole);
+    : (orgType || rawRole);
   if (requiredRoles.length > 0 && !requiredRoles.includes(effectiveRole)) {
     return <UnauthorizedPage />;
   }

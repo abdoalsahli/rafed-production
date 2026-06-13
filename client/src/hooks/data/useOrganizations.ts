@@ -1,4 +1,5 @@
 import { trpc } from '@/lib/trpc';
+import { toast } from 'sonner';
 
 export interface Organization {
   id: number;
@@ -44,13 +45,21 @@ export function useOrganizations() {
   
   const createMutation = trpc.organizations.createOrganization.useMutation({
     onSuccess: () => {
+      toast.success('تم إنشاء المؤسسة بنجاح');
       refetch();
+    },
+    onError: (err) => {
+      toast.error(err.message || 'فشل إنشاء المؤسسة');
     },
   });
 
   const updateMutation = trpc.organizations.updateOrganization.useMutation({
     onSuccess: () => {
+      toast.success('تم تحديث المؤسسة بنجاح');
       refetch();
+    },
+    onError: (err) => {
+      toast.error(err.message || 'فشل تحديث المؤسسة');
     },
   });
 
