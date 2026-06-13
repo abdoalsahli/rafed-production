@@ -626,7 +626,8 @@ export const distributorRouter = router({
       try {
         // Get distributor organization info
         const [rows] = await conn.execute(
-          `SELECT o.id, o.name, o.type, o.logo_url, d.id as distributor_id, u.name, u.email
+          `SELECT o.id, o.name, o.type, d.id as distributor_id, u.name, u.email,
+                  IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='organizations' AND COLUMN_NAME='logo_url'), o.logo_url, NULL) as logo_url
            FROM organizations o
            INNER JOIN organization_users ou ON o.id = ou.organization_id
            INNER JOIN distributors d ON d.organization_id = o.id

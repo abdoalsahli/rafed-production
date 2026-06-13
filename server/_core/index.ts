@@ -54,10 +54,16 @@ async function startServer() {
     if (pool) {
       const conn = await pool.getConnection();
       try {
-        await conn.execute(
-          `ALTER TABLE organizations ADD COLUMN IF NOT EXISTS logo_url LONGTEXT NULL`
-        );
-        console.log('[SERVER-INIT] Schema migration: logo_url column ensured');
+        const [cols] = await conn.execute(
+          `SELECT COUNT(*) as cnt FROM INFORMATION_SCHEMA.COLUMNS
+           WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'organizations' AND COLUMN_NAME = 'logo_url'`
+        ) as any[];
+        if (cols[0].cnt === 0) {
+          await conn.execute(`ALTER TABLE organizations ADD COLUMN logo_url LONGTEXT NULL`);
+          console.log('[SERVER-INIT] Schema migration: added logo_url column');
+        } else {
+          console.log('[SERVER-INIT] Schema migration: logo_url column already exists');
+        }
       } finally {
         conn.release();
       }

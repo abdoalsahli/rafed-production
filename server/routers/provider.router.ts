@@ -1771,7 +1771,8 @@ export const providerRouter = router({
       try {
         // Get provider organization info
         const [rows] = await conn.execute(
-          `SELECT o.id, o.name, o.type, o.status, o.contact_person, o.email, o.phone, o.address, o.notes, o.logo_url,
+          `SELECT o.id, o.name, o.type, o.status, o.contact_person, o.email, o.phone, o.address, o.notes,
+                  IF(EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME='organizations' AND COLUMN_NAME='logo_url'), o.logo_url, NULL) as logo_url,
                   sp.id as provider_id, sp.provider_code, sp.created_at, sp.updated_at, u.name as user_name, u.email as user_email
            FROM organizations o
            INNER JOIN organization_users ou ON o.id = ou.organization_id
