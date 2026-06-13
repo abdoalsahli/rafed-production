@@ -1771,7 +1771,7 @@ export const providerRouter = router({
       try {
         // Get provider organization info
         const [rows] = await conn.execute(
-          `SELECT o.id, o.name, o.type, o.status, o.contact_person, o.email, o.phone, o.address, o.notes,
+          `SELECT o.id, o.name, o.type, o.status, o.contact_person, o.email, o.phone, o.address, o.notes, o.logo_url,
                   sp.id as provider_id, sp.provider_code, sp.created_at, sp.updated_at, u.name as user_name, u.email as user_email
            FROM organizations o
            INNER JOIN organization_users ou ON o.id = ou.organization_id
@@ -1801,6 +1801,7 @@ export const providerRouter = router({
           phone: row.phone || "",
           address: row.address || "",
           notes: row.notes || "",
+          logoUrl: row.logo_url || null,
           userName: row.user_name || "",
           userEmail: row.user_email || "",
           createdAt: row.created_at,
@@ -1884,6 +1885,28 @@ export const providerRouter = router({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to update settings",
         });
+      }
+    }),
+
+  uploadLogo: protectedProcedure
+    .input(z.object({
+      logoDataUrl: z.string().max(2_000_000, "Image too large (max ~1.5 MB)"),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const pool = await getRawDb();
+      if (!pool) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+      const conn = await pool.getConnection();
+      try {
+        await conn.execute(
+          `UPDATE organizations o
+           INNER JOIN organization_users ou ON o.id = ou.organization_id
+           SET o.logo_url = ?
+           WHERE ou.user_id = ? AND o.type = 'provider'`,
+          [input.logoDataUrl, ctx.user.id]
+        );
+        return { success: true };
+      } finally {
+        conn.release();
       }
     }),
 

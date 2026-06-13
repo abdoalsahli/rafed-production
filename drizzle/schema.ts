@@ -624,7 +624,8 @@ export const organizations = mysqlTable("organizations", {
   email: varchar("email", { length: 320 }),
   phone: varchar("phone", { length: 20 }),
   address: text("address"),
-  notes: text("notes")
+  notes: text("notes"),
+  logoUrl: text("logo_url"),
 }, (table) => ({
   nameIdx: index("idx_organizations_name").on(table.name),
   typeIdx: index("idx_organizations_type").on(table.type),

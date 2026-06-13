@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { formatDateTime } from '@/lib/dateUtils';
 import {
   Lock, Bell, User, Save, X, Zap, Copy, Eye, EyeOff,
-  RotateCcw, AlertTriangle, Check,
+  RotateCcw, AlertTriangle, Check, Building2,
 } from 'lucide-react';
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { LogoUpload } from '@/components/ui/LogoUpload';
 
 /* ── types ─────────────────────────────────────────────────────────────── */
 interface SettingsForm {
@@ -109,6 +110,11 @@ export const SettingsPage: React.FC = () => {
   });
 
   /* ── mutations ────────────────────────────────────────────────────────── */
+  const uploadLogoMutation = trpc.distributor.uploadLogo.useMutation({
+    onSuccess: () => { toast.success('تم رفع الشعار بنجاح'); },
+    onError: (err) => { toast.error(err.message || 'فشل رفع الشعار'); },
+  });
+
   const updateProfileMutation = trpc.distributor.updateProfile.useMutation({
     onSuccess: () => toast.success('تم حفظ الملف الشخصي'),
     onError:   (err) => toast.error(err.message || 'فشل الحفظ'),
@@ -184,6 +190,19 @@ export const SettingsPage: React.FC = () => {
         title="الإعدادات"
         subtitle="إدارة حسابك وتفضيلاتك"
       />
+
+      {/* ── Organization Logo ────────────────────────────────────────────── */}
+      <SectionCard
+        icon={<Building2 size={17} className="text-[#00236f]" />}
+        title="شعار المؤسسة"
+        subtitle="يظهر الشعار في لوحة التحكم وصفحات النظام"
+      >
+        <LogoUpload
+          logoUrl={profileData?.logoUrl ?? null}
+          isUploading={uploadLogoMutation.isPending}
+          onUpload={async (dataUrl) => { await uploadLogoMutation.mutateAsync({ logoDataUrl: dataUrl }); }}
+        />
+      </SectionCard>
 
       {/* ── Profile ──────────────────────────────────────────────────────── */}
       <SectionCard

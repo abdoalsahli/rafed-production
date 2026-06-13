@@ -626,7 +626,7 @@ export const distributorRouter = router({
       try {
         // Get distributor organization info
         const [rows] = await conn.execute(
-          `SELECT o.id, o.name, o.type, d.id as distributor_id, u.name, u.email
+          `SELECT o.id, o.name, o.type, o.logo_url, d.id as distributor_id, u.name, u.email
            FROM organizations o
            INNER JOIN organization_users ou ON o.id = ou.organization_id
            INNER JOIN distributors d ON d.organization_id = o.id
@@ -652,6 +652,7 @@ export const distributorRouter = router({
           email: row.email || "",
           phone: "",
           company: row.name || "",
+          logoUrl: row.logo_url || null,
         };
       } finally {
         conn.release();
@@ -720,6 +721,28 @@ export const distributorRouter = router({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to update profile",
         });
+      }
+    }),
+
+  uploadLogo: protectedProcedure
+    .input(z.object({
+      logoDataUrl: z.string().max(2_000_000, "Image too large (max ~1.5 MB)"),
+    }))
+    .mutation(async ({ ctx, input }) => {
+      const pool = await getRawDb();
+      if (!pool) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database not available" });
+      const conn = await pool.getConnection();
+      try {
+        await conn.execute(
+          `UPDATE organizations o
+           INNER JOIN organization_users ou ON o.id = ou.organization_id
+           SET o.logo_url = ?
+           WHERE ou.user_id = ? AND o.type = 'distributor'`,
+          [input.logoDataUrl, ctx.user.id]
+        );
+        return { success: true };
+      } finally {
+        conn.release();
       }
     }),
 

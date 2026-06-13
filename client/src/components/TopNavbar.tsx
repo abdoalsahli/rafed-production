@@ -28,6 +28,7 @@ interface TopNavbarProps {
   userEmail:   string | null;
   userRole:    string | null;
   onNavigate:  (path: string) => void;
+  logoUrl?:    string | null;
 }
 
 /* ════════════════════════════════════════════════════════════════════════════
@@ -40,6 +41,7 @@ export function TopNavbar({
   userEmail,
   userRole,
   onNavigate,
+  logoUrl,
 }: TopNavbarProps) {
   const [query,   setQuery]   = useState('');
   const [focused, setFocused] = useState(false);
@@ -159,10 +161,14 @@ export function TopNavbar({
         {/* User profile — LTR internally: avatar LEFT, text RIGHT */}
         <div className="flex items-center gap-2" dir="ltr">
           <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 select-none"
-            style={{ backgroundColor: 'var(--rf-primary)' }}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0 select-none overflow-hidden"
+            style={{ backgroundColor: logoUrl ? undefined : 'var(--rf-primary)' }}
           >
-            {initial}
+            {logoUrl ? (
+              <img src={logoUrl} alt="شعار المؤسسة" className="w-full h-full object-contain" />
+            ) : (
+              initial
+            )}
           </div>
           <div className="hidden sm:block text-right">
             <p className="text-sm font-semibold text-[#0b1c30] leading-tight">{displayName}</p>

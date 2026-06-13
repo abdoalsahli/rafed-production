@@ -7,6 +7,7 @@ import {
 import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 import { PageHeader } from '@/components/ui/PageHeader';
+import { LogoUpload } from '@/components/ui/LogoUpload';
 
 /* ── types ─────────────────────────────────────────────────────────────── */
 interface SettingsForm {
@@ -126,6 +127,11 @@ export const ProviderSettingsPage: React.FC = () => {
   });
 
   /* ── mutations ────────────────────────────────────────────────────────── */
+  const uploadLogoMutation = trpc.provider.uploadLogo.useMutation({
+    onSuccess: () => { toast.success('تم رفع الشعار بنجاح'); },
+    onError: (err) => { toast.error(err.message || 'فشل رفع الشعار'); },
+  });
+
   const updateSettingsMutation = trpc.provider.updateSettings.useMutation({
     onSuccess: () => {
       toast.success('تم حفظ الإعدادات');
@@ -210,6 +216,19 @@ export const ProviderSettingsPage: React.FC = () => {
         title="الإعدادات"
         subtitle="إدارة ملف مؤسستك وبيانات الحساب"
       />
+
+      {/* ── Organization Logo ────────────────────────────────────────────── */}
+      <SectionCard
+        icon={<Building2 size={17} className="text-[#00236f]" />}
+        title="شعار المؤسسة"
+        subtitle="يظهر الشعار في لوحة التحكم وصفحات النظام"
+      >
+        <LogoUpload
+          logoUrl={settingsData?.logoUrl ?? null}
+          isUploading={uploadLogoMutation.isPending}
+          onUpload={async (dataUrl) => { await uploadLogoMutation.mutateAsync({ logoDataUrl: dataUrl }); }}
+        />
+      </SectionCard>
 
       {/* ── Organization Profile ──────────────────────────────────────────── */}
       <SectionCard
