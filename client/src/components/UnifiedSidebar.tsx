@@ -32,6 +32,7 @@ interface UnifiedSidebarProps {
   userEmail: string | null;
   userName: string | null;
   userRole: string | null;
+  logoUrl?: string | null;
   onNavigate: (path: string) => void;
   onLogout: () => void;
 }
@@ -50,6 +51,7 @@ export function UnifiedSidebar({
   userEmail,
   userName,
   userRole,
+  logoUrl,
   onNavigate,
   onLogout,
 }: UnifiedSidebarProps) {
@@ -119,10 +121,13 @@ export function UnifiedSidebar({
         Brand + portal label (second) → to the left of avatar.
       */}
       <div
-        className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-base shrink-0 select-none"
-        style={{ backgroundColor: 'var(--rf-primary)' }}
+        className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-base shrink-0 select-none overflow-hidden"
+        style={{ backgroundColor: logoUrl ? undefined : 'var(--rf-primary)' }}
       >
-        {initial}
+        {logoUrl
+          ? <img src={logoUrl} alt="شعار المؤسسة" className="w-full h-full object-contain" />
+          : initial
+        }
       </div>
       <div className="flex-1 min-w-0">
         <p className="font-bold text-sm leading-tight tracking-tight" style={{ color: 'var(--rf-primary)' }}>

@@ -45,6 +45,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { useAuth } from "./_core/hooks/useAuth";
 import { useNavigationItems } from "./hooks/useNavigationItems";
 import { useCurrentRoleContext } from "./hooks/useCurrentRoleContext";
+import { trpc } from "./lib/trpc";
 
 // Public pages that should NOT show sidebar
 const PUBLIC_PAGES = ["/login", "/signup", "/pending-activation", "/suspended", "/unauthorized", "/404"];
@@ -55,6 +56,17 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const { userRole, userEmail, isAuthenticated } = useCurrentRoleContext();
   const navItems = useNavigationItems(userRole);
   const userName = user?.name || null;
+
+  // Fetch org logo based on role
+  const { data: providerSettings } = trpc.provider.getSettings.useQuery(undefined, {
+    enabled: userRole === 'provider',
+    staleTime: 5 * 60 * 1000,
+  });
+  const { data: distributorProfile } = trpc.distributor.getProfile.useQuery(undefined, {
+    enabled: userRole === 'distributor',
+    staleTime: 5 * 60 * 1000,
+  });
+  const logoUrl = providerSettings?.logoUrl || distributorProfile?.logoUrl || null;
   
   // Don't show sidebar on public pages
   const showSidebar = isAuthenticated && !PUBLIC_PAGES.includes(location);
@@ -85,6 +97,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
           userEmail={userEmail}
           userName={userName}
           userRole={userRole}
+          logoUrl={logoUrl}
           onNavigate={handleNavigate}
           onLogout={handleLogout}
         />
@@ -97,6 +110,7 @@ function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
             userName={userName}
             userEmail={userEmail}
             userRole={userRole}
+            logoUrl={logoUrl}
             onNavigate={handleNavigate}
           />
         )}
