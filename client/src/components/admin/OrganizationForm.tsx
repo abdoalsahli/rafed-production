@@ -58,6 +58,8 @@ export function OrganizationForm({
     }
   }, [organization]);
 
+  const opt = (v: string) => v.trim() || undefined;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (organization) {
@@ -65,21 +67,21 @@ export function OrganizationForm({
         id:            organization.id,
         name:          formData.name,
         status:        formData.status,
-        contactPerson: formData.contactPerson,
-        email:         formData.email,
-        phone:         formData.phone,
-        address:       formData.address,
-        notes:         formData.notes,
+        contactPerson: opt(formData.contactPerson),
+        email:         opt(formData.email),
+        phone:         opt(formData.phone),
+        address:       opt(formData.address),
+        notes:         opt(formData.notes),
       });
     } else {
       onSubmit({
         name:          formData.name,
         type:          formData.type,
-        contactPerson: formData.contactPerson,
-        email:         formData.email,
-        phone:         formData.phone,
-        address:       formData.address,
-        notes:         formData.notes,
+        contactPerson: opt(formData.contactPerson),
+        email:         opt(formData.email),
+        phone:         opt(formData.phone),
+        address:       opt(formData.address),
+        notes:         opt(formData.notes),
       });
     }
   };
