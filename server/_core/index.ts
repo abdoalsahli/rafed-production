@@ -47,6 +47,25 @@ async function startServer() {
   await connectionPoolManager.initialize();
   console.log('[SERVER-INIT] Connection pool initialized');
 
+  // Run lightweight schema migrations (idempotent — safe to run on every boot)
+  try {
+    const { getRawDb } = await import('../db');
+    const pool = await getRawDb();
+    if (pool) {
+      const conn = await pool.getConnection();
+      try {
+        await conn.execute(
+          `ALTER TABLE organizations ADD COLUMN IF NOT EXISTS logo_url LONGTEXT NULL`
+        );
+        console.log('[SERVER-INIT] Schema migration: logo_url column ensured');
+      } finally {
+        conn.release();
+      }
+    }
+  } catch (e) {
+    console.warn('[SERVER-INIT] Schema migration warning (non-fatal):', e);
+  }
+
   console.log('[SERVER-INIT] Validating PIN encryption key...');
   // Validate PIN_ENCRYPTION_KEY first - fail fast if invalid
   assertPINEncryptionKeyValid();
