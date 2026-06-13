@@ -20,7 +20,10 @@ function generateProviderCode(name: string): string {
 }
 
 const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  if (!ctx.user || ctx.user.role !== "admin") {
+  const isAdmin =
+    ctx.user?.role === "admin" ||
+    (ctx.user as any)?.organizationType === "internal";
+  if (!ctx.user || !isAdmin) {
     throw new TRPCError({ code: "FORBIDDEN", message: "Admin only" });
   }
   return next({ ctx });

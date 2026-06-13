@@ -6,6 +6,7 @@ import { getRawDb } from "../db";
 export type UserWithProvider = User & {
   providerId?: number;
   organizationId?: number;
+  organizationType?: 'provider' | 'distributor' | 'internal';
 };
 
 export type TrpcContext = {
@@ -30,11 +31,11 @@ export async function createContext(
           try {
             // Query: Find provider for this user via organization_users -> organizations -> service_providers
             const [rows] = await connection.execute(
-              `SELECT sp.id as provider_id, sp.organization_id
-               FROM service_providers sp
-               INNER JOIN organizations o ON sp.organization_id = o.id
+              `SELECT sp.id as provider_id, sp.organization_id, o.type as org_type
+               FROM organizations o
                INNER JOIN organization_users ou ON o.id = ou.organization_id
-               WHERE ou.user_id = ? AND o.type = 'provider'
+               LEFT JOIN service_providers sp ON sp.organization_id = o.id
+               WHERE ou.user_id = ?
                LIMIT 1`,
               [baseUser.id]
             );
@@ -43,10 +44,11 @@ export async function createContext(
               const row = (rows as any[])[0];
               user = {
                 ...baseUser,
-                providerId: row.provider_id,
+                providerId: row.provider_id || undefined,
                 organizationId: row.organization_id || undefined,
+                organizationType: row.org_type || undefined,
               };
-              console.log(`[Context] User ${baseUser.id} resolved to provider ${row.provider_id}`);
+              console.log(`[Context] User ${baseUser.id} org_type=${row.org_type} provider=${row.provider_id}`);
             } else {
               console.warn(`[Context] No provider found for user ${baseUser.id}`);
               user = baseUser as UserWithProvider;
