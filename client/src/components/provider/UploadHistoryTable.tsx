@@ -94,8 +94,8 @@ export function UploadHistoryTable({ uploads, isLoading }: UploadHistoryTablePro
                 <TableCell className="font-medium text-[#0b1c30] max-w-[200px] truncate">
                   {upload.fileName}
                 </TableCell>
-                <TableCell className="num text-sm text-[#444651]">
-                  {formatDateTime(upload.uploadedAt)}
+                <TableCell className="text-sm text-[#444651]">
+                  <span dir="rtl">{formatDateTime(upload.uploadedAt)}</span>
                 </TableCell>
                 <TableCell>
                   <Badge
