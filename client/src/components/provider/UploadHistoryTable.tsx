@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { formatDateOnly } from '@/lib/dateUtils';
+import { formatDateTime } from '@/lib/dateUtils';
 import { formatCount } from '@/lib/numberUtils';
 import {
   Table,
@@ -95,7 +95,7 @@ export function UploadHistoryTable({ uploads, isLoading }: UploadHistoryTablePro
                   {upload.fileName}
                 </TableCell>
                 <TableCell className="num text-sm text-[#444651]">
-                  {formatDateOnly(upload.uploadedAt)}
+                  {formatDateTime(upload.uploadedAt)}
                 </TableCell>
                 <TableCell>
                   <Badge
