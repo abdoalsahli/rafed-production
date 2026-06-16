@@ -49,7 +49,7 @@ import { useCurrentRoleContext } from "./hooks/useCurrentRoleContext";
 import { trpc } from "./lib/trpc";
 
 // Public pages that should NOT show sidebar
-const PUBLIC_PAGES = ["/login", "/signup", "/pending-activation", "/suspended", "/unauthorized", "/404", "/landing"];
+const PUBLIC_PAGES = ["/", "/login", "/signup", "/pending-activation", "/suspended", "/unauthorized", "/404", "/landing"];
 
 function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const { logout, user } = useAuth();
