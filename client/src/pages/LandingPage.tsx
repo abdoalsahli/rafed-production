@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const C = {
   bg:       '#F6F8FD',
@@ -84,6 +84,35 @@ function StageVisual({ i }: { i: number }) {
         <div style={{ fontSize: 13, color: C.accent, fontWeight: 800 }}>مخزون مقبول</div>
       </div>
     </div>
+  );
+}
+
+function ScrollToTopButton() {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setVisible(window.scrollY > 400);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  return (
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      aria-label="العودة إلى الأعلى"
+      style={{
+        position: 'fixed', bottom: 32, left: 32, zIndex: 100,
+        width: 48, height: 48, borderRadius: '50%',
+        background: C.brand, color: '#fff', border: 'none',
+        display: 'grid', placeItems: 'center', cursor: 'pointer',
+        boxShadow: '0 8px 24px rgba(0,35,111,0.28)',
+        opacity: visible ? 1 : 0,
+        pointerEvents: visible ? 'auto' : 'none',
+        transition: 'opacity .25s,transform .25s',
+        transform: visible ? 'translateY(0)' : 'translateY(12px)',
+        fontSize: 20, lineHeight: 1,
+      }}
+    >↑</button>
   );
 }
 
@@ -662,6 +691,8 @@ export default function LandingPage() {
           </div>
         </div>
       </section>
+
+      <ScrollToTopButton />
 
       {/* ── FOOTER ── */}
       <footer style={{ borderTop: `1px solid ${C.line}`, background: C.bg2 }}>
