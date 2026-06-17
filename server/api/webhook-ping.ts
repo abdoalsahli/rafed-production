@@ -77,7 +77,8 @@ export async function handleWebhookPing(
   };
   const payloadJson = JSON.stringify(payload);
 
-  const headers = WebhookSecurityService.generateHeaders(payloadJson, cred.secretHash);
+  const signingSecret = cred.webhookSecret ?? cred.secretHash;
+  const headers = WebhookSecurityService.generateHeaders(payloadJson, signingSecret);
 
   try {
     const controller = new AbortController();

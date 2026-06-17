@@ -15,6 +15,11 @@ function generateApiKey(): { keyId: string; secret: string; masked: string } {
   return { keyId, secret, masked };
 }
 
+// Generate an independent webhook signing secret
+function generateWebhookSecret(): string {
+  return `whsec_${crypto.randomBytes(32).toString("hex")}`;
+}
+
 // Hash a secret for storage
 function hashSecret(secret: string): string {
   return crypto.createHash("sha256").update(secret).digest("hex");
@@ -95,12 +100,14 @@ export const distributorApiRouter = router({
 
       const { keyId, secret, masked } = generateApiKey();
       const secretHash = hashSecret(secret);
+      const webhookSecret = generateWebhookSecret();
 
       await db.insert(distributorApiCredentials).values({
         distributorId,
         keyId,
         maskedKey: masked,
         secretHash,
+        webhookSecret,
         status: "active",
       });
 
@@ -108,7 +115,8 @@ export const distributorApiRouter = router({
         keyId,
         secret, // Only return the full secret on initial generation
         maskedKey: masked,
-        message: "API key generated successfully. Save the secret in a secure location.",
+        webhookSecret, // Return once — distributor must save this for HMAC verification
+        message: "API key generated successfully. Save the secret and webhookSecret in a secure location.",
       };
     } catch (error) {
       console.error("[API Credentials] Error generating key:", error);
@@ -157,12 +165,14 @@ export const distributorApiRouter = router({
       // Generate new credential
       const { keyId, secret, masked } = generateApiKey();
       const secretHash = hashSecret(secret);
+      const webhookSecret = generateWebhookSecret();
 
       await db.insert(distributorApiCredentials).values({
         distributorId,
         keyId,
         maskedKey: masked,
         secretHash,
+        webhookSecret,
         status: "active",
       });
 
@@ -170,6 +180,7 @@ export const distributorApiRouter = router({
         keyId,
         secret,
         maskedKey: masked,
+        webhookSecret, // New secret — distributor must update their HMAC verification
         message: "API key rotated successfully. The previous key is now inactive.",
       };
     } catch (error) {

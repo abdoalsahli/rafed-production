@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { getDb, getRawDb, insertAuditLog } from "../db";
+import { getDb } from "../db";
 import { queueManager } from "../queue-manager";
 import { purchaseRequests, products, providerDistributorRelationships } from "../../drizzle/schema";
 import { eq, and } from "drizzle-orm";
-import { pinEncryptionService } from "../services/encryption.service";
+import { revealPinOnce } from "../services/pin-reveal.service";
 
 /**
  * Request body validation schema
@@ -162,11 +162,16 @@ export async function handleExternalPurchase(
       return;
     }
 
-    // Check for idempotency - return existing result if found
+    // Check for idempotency - scoped to this distributor to prevent cross-tenant leakage (C-1)
     const existingRequests = await db
       .select()
       .from(purchaseRequests)
-      .where(eq(purchaseRequests.idempotencyKey, idempotencyKey));
+      .where(
+        and(
+          eq(purchaseRequests.idempotencyKey, idempotencyKey),
+          eq(purchaseRequests.distributorId, distributorId)
+        )
+      );
 
     if (existingRequests.length > 0) {
       const existing = existingRequests[0];
@@ -291,46 +296,13 @@ async function formatPurchaseResponse(
     return base;
   }
 
-  // Atomically mark PIN as viewed (one-time guarantee)
-  const pool = await getRawDb();
-  const [pinRow]: any = pool
-    ? await pool.query("SELECT pin_encrypted, pin_viewed, serial_number FROM cards WHERE id = ?", [request.cardId])
-    : [[]];
-  const card = pinRow?.[0];
-
-  if (!card) {
-    base.card = { serialNumber: null, pin: null };
-    return base;
-  }
-
-  if (Number(card.pin_viewed) === 1) {
-    // PIN already retrieved — don't expose it again
-    base.card = { serialNumber: card.serial_number ?? null, pin: null, note: "PIN already retrieved" };
-    return base;
-  }
-
-  const [markResult]: any = pool
-    ? await pool.query("UPDATE cards SET pin_viewed = 1, updated_at = NOW() WHERE id = ? AND pin_viewed = 0", [request.cardId])
-    : [{ affectedRows: 0 }];
-
-  if (!markResult?.affectedRows) {
-    base.card = { serialNumber: card.serial_number ?? null, pin: null, note: "PIN already retrieved" };
-    return base;
-  }
-
-  try {
-    const pin = await pinEncryptionService.decryptPIN(card.pin_encrypted);
-    await insertAuditLog(db, {
-      userId: distributorId,
-      action: "PIN_VIEWED",
-      resourceId: request.cardId,
-      metadata: { requestId: request.id, distributorId, credentialId, source: "external_api" },
-    });
-    base.card = { serialNumber: card.serial_number ?? null, pin };
-  } catch (err) {
-    console.error("[External API] PIN decryption failed:", err);
-    base.card = { serialNumber: card.serial_number ?? null, pin: null, note: "PIN decryption failed" };
-  }
+  base.card = await revealPinOnce(
+    request.cardId,
+    distributorId,
+    credentialId,
+    request.id,
+    "external_api",
+  );
 
   return base;
 }

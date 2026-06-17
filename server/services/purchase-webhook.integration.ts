@@ -33,7 +33,6 @@ export class PurchaseWebhookIntegration {
     distributorId: number,
     productId: number,
     cardSerial?: string,
-    cardPin?: string
   ): Promise<void> {
     try {
       const db = await getDb();
@@ -83,6 +82,9 @@ export class PurchaseWebhookIntegration {
       const provider = providerList[0];
 
       // Build webhook payload with eventId for replay protection
+      // PIN is intentionally excluded from the webhook payload.
+      // Distributors must call GET /api/v1/purchases/:requestId to retrieve the PIN
+      // via the one-time atomic reveal mechanism.
       const payload: WebhookPayload = {
         eventId: WebhookSecurityService.generateEventId(),
         event: "purchase.succeeded",
@@ -94,19 +96,19 @@ export class PurchaseWebhookIntegration {
         productName: product?.name,
         amount: product?.price?.toString(),
         serial: cardSerial,
-        pin: cardPin,
         status: "SUCCEEDED",
         timestamp: new Date().toISOString(),
       };
 
       // Queue webhook delivery (async, non-blocking)
+      const signingSecret = cred.webhookSecret ?? cred.secretHash;
       await WebhookDeliveryService.createAndQueueWebhook(
         distributorId,
         purchaseRequestId,
         "purchase.succeeded",
         payload,
         cred.webhookUrl,
-        cred.secretHash // Using secretHash as temporary secret (should be stored separately in production)
+        signingSecret,
       );
 
       console.log(
@@ -204,13 +206,14 @@ export class PurchaseWebhookIntegration {
       };
 
       // Queue webhook delivery (async, non-blocking)
+      const signingSecret = cred.webhookSecret ?? cred.secretHash;
       await WebhookDeliveryService.createAndQueueWebhook(
         distributorId,
         purchaseRequestId,
         "purchase.failed",
         payload,
         cred.webhookUrl,
-        cred.secretHash
+        signingSecret,
       );
 
       console.log(

@@ -66,6 +66,17 @@ async function startServer() {
         } else {
           console.log('[SERVER-INIT] Schema migration: logo_url column already exists');
         }
+        // Add webhook_secret column (C-2 fix)
+        const [whCols] = await conn.execute(
+          `SELECT COUNT(*) as cnt FROM INFORMATION_SCHEMA.COLUMNS
+           WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'distributor_api_credentials' AND COLUMN_NAME = 'webhook_secret'`
+        ) as any[];
+        if (whCols[0].cnt === 0) {
+          await conn.execute(
+            `ALTER TABLE distributor_api_credentials ADD COLUMN webhook_secret VARCHAR(128) NULL AFTER secret_hash`
+          );
+          console.log('[SERVER-INIT] Schema migration: added webhook_secret column');
+        }
       } finally {
         conn.release();
       }

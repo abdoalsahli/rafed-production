@@ -692,6 +692,7 @@ export const distributorApiCredentials = mysqlTable("distributor_api_credentials
   keyId: varchar("key_id", { length: 64 }).notNull().unique(), // Public identifier
   maskedKey: varchar("masked_key", { length: 64 }).notNull(), // e.g., "sk_live_...abc123" (last 12 chars visible)
   secretHash: varchar("secret_hash", { length: 255 }).notNull(), // Hashed secret for verification
+  webhookSecret: varchar("webhook_secret", { length: 128 }), // Independent HMAC signing secret for webhooks
   status: mysqlEnum("status", ["active", "rotated", "revoked"]).default("active").notNull(),
   webhookUrl: varchar("webhook_url", { length: 2048 }),
   lastUsedAt: timestamp("last_used_at"),

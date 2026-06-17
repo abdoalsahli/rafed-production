@@ -260,7 +260,6 @@ class QueueManager {
           distributorId,
           productId,
           result.cardSerial,
-          result.cardPin
         ).catch(err => {
           console.error('[Queue Manager] Webhook error (non-blocking):', err);
         });

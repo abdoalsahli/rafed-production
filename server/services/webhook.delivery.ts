@@ -26,7 +26,6 @@ export interface WebhookPayload {
   productName?: string;
   amount?: string;
   serial?: string;
-  pin?: string;
   status: string;
   reason?: string; // For failed purchases
   timestamp: string;
