@@ -17,6 +17,8 @@ import { apiAuthMiddleware } from "./api-auth";
 import { handleExternalPurchase } from "../api/purchase";
 import { handleProductCatalog } from "../api/catalog";
 import { handlePurchaseStatus } from "../api/status";
+import { handleWebhookPing } from "../api/webhook-ping";
+import { WebhookDeliveryService } from "../services/webhook.delivery";
 
 function isPortAvailable(port: number): Promise<boolean> {
   return new Promise(resolve => {
@@ -117,6 +119,7 @@ async function startServer() {
   app.get('/api/v1/products', apiAuthMiddleware, handleProductCatalog);
   app.post('/api/v1/purchases', apiAuthMiddleware, handleExternalPurchase);
   app.get('/api/v1/purchases/:requestId', apiAuthMiddleware, handlePurchaseStatus);
+  app.post('/api/v1/webhooks/test', apiAuthMiddleware, handleWebhookPing);
   console.log('[SERVER-INIT] External API endpoints registered');
   // Register Prometheus metrics endpoint
   console.log('[SERVER-INIT] Registering metrics endpoint...');
@@ -141,6 +144,13 @@ async function startServer() {
     console.log('[SERVER-INIT] tRPC endpoint: http://localhost:${port}/api/trpc');
     console.log('[SERVER-INIT] External API endpoint: http://localhost:${port}/api/v1/purchases');
   });
+
+  // Webhook retry worker — runs every 30 seconds to re-attempt failed deliveries
+  setInterval(() => {
+    WebhookDeliveryService.processPendingDeliveries().catch((err) => {
+      console.error('[Webhook-Worker] processPendingDeliveries error:', err);
+    });
+  }, 30_000);
 }
 
 console.log('[SERVER-INIT] Starting server...');
