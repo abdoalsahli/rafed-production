@@ -18,6 +18,28 @@ import { getDistributorIdFromUser } from "../utils/org-lookup";
 
 export const distributorRouter = router({
   /**
+   * distributor.listAllProviders
+   * Returns all active providers so distributors can browse and connect
+   */
+  listAllProviders: protectedProcedure.query(async ({ ctx }) => {
+    const db = await getDb();
+    if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database connection not available" });
+
+    const providers = await db
+      .select({
+        id: serviceProviders.id,
+        name: serviceProviders.name,
+        providerCode: serviceProviders.providerCode,
+        createdAt: serviceProviders.createdAt,
+      })
+      .from(serviceProviders)
+      .where(eq(serviceProviders.status, "active"))
+      .orderBy(serviceProviders.name);
+
+    return providers;
+  }),
+
+  /**
    * distributor.findProviderByCode
    * Lookup a provider by their unique provider code
    * Returns provider info if found and active
