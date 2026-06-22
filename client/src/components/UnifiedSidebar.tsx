@@ -183,7 +183,7 @@ export function UnifiedSidebar({
 
       {/* ── Desktop fixed sidebar ─────────────────────────────────────── */}
       <aside
-        className="hidden lg:flex lg:flex-col fixed right-0 top-0 h-screen bg-white border-l border-border z-40"
+        className="hidden lg:flex lg:flex-col fixed right-0 top-0 h-dvh bg-white border-l border-border z-40"
         style={{ width: 'var(--sidebar-width, 260px)' }}
       >
         {header}
@@ -201,7 +201,7 @@ export function UnifiedSidebar({
             onClick={() => setMobileOpen(false)}
           />
           <aside
-            className="fixed right-0 top-0 h-screen bg-white border-l border-border z-50 lg:hidden flex flex-col"
+            className="fixed right-0 top-0 h-dvh bg-white border-l border-border z-50 lg:hidden flex flex-col"
             style={{ width: 'var(--sidebar-width, 260px)' }}
           >
             {/* Close button */}
