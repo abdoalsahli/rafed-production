@@ -22,21 +22,44 @@ export const distributorRouter = router({
    * Returns all active providers so distributors can browse and connect
    */
   listAllProviders: protectedProcedure.query(async ({ ctx }) => {
-    const db = await getDb();
-    if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database connection not available" });
+    const pool = await getRawDb();
+    if (!pool) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database connection not available" });
 
-    const providers = await db
-      .select({
-        id: serviceProviders.id,
-        name: serviceProviders.name,
-        providerCode: serviceProviders.providerCode,
-        createdAt: serviceProviders.createdAt,
-      })
-      .from(serviceProviders)
-      .where(eq(serviceProviders.status, "active"))
-      .orderBy(serviceProviders.name);
+    const distributorId = await getDistributorIdFromUser(ctx.user.id);
 
-    return providers;
+    // Single query: providers + their relationship/request status for this distributor
+    const [rows]: any = await pool.query(
+      `SELECT
+         sp.id,
+         sp.name,
+         sp.provider_code AS providerCode,
+         sp.created_at   AS createdAt,
+         COALESCE(pdr.status, ar.status, 'not_connected') AS connectionStatus,
+         pdr.commission_rate  AS commissionRate,
+         pdr.credit_limit     AS creditLimit
+       FROM service_providers sp
+       LEFT JOIN provider_distributor_relationships pdr
+         ON pdr.provider_id = sp.id AND pdr.distributor_id = ?
+       LEFT JOIN (
+         SELECT provider_id, status
+         FROM access_requests
+         WHERE distributor_id = ?
+         ORDER BY created_at DESC
+       ) ar ON ar.provider_id = sp.id
+       WHERE sp.status = 'active'
+       ORDER BY sp.name ASC`,
+      [distributorId, distributorId]
+    );
+
+    return rows as Array<{
+      id: number;
+      name: string;
+      providerCode: string;
+      createdAt: string;
+      connectionStatus: 'active' | 'suspended' | 'pending' | 'rejected' | 'not_connected';
+      commissionRate: number | null;
+      creditLimit: number | null;
+    }>;
   }),
 
   /**
