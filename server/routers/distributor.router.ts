@@ -32,20 +32,16 @@ export const distributorRouter = router({
       `SELECT
          sp.id,
          sp.name,
-         sp.provider_code AS providerCode,
-         sp.created_at   AS createdAt,
+         sp.provider_code        AS providerCode,
+         sp.created_at           AS createdAt,
          COALESCE(pdr.status, ar.status, 'not_connected') AS connectionStatus,
-         pdr.commission_rate  AS commissionRate,
-         pdr.credit_limit     AS creditLimit
+         pdr.commission_percentage AS commissionRate,
+         pdr.credit_line           AS creditLimit
        FROM service_providers sp
        LEFT JOIN provider_distributor_relationships pdr
          ON pdr.provider_id = sp.id AND pdr.distributor_id = ?
-       LEFT JOIN (
-         SELECT provider_id, status
-         FROM access_requests
-         WHERE distributor_id = ?
-         ORDER BY created_at DESC
-       ) ar ON ar.provider_id = sp.id
+       LEFT JOIN access_requests ar
+         ON ar.provider_id = sp.id AND ar.distributor_id = ?
        WHERE sp.status = 'active'
        ORDER BY sp.name ASC`,
       [distributorId, distributorId]
