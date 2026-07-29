@@ -119,7 +119,7 @@ export default function LandingPage() {
           </div>
 
           <h1 style={{ fontSize: 'clamp(40px,5.6vw,72px)', lineHeight: 1.08, fontWeight: 900, letterSpacing: '-1.5px', margin: '0 auto 22px', maxWidth: 880 }}>
-            شبكة توزيعك بالكامل،<br />في لوحة <span style={{ color: A }}>واحدة.</span>
+            توزيع كروتك بالكامل،<br />في لوحة <span style={{ color: A }}>واحدة.</span>
           </h1>
 
           <p style={{ fontSize: 20, lineHeight: 1.8, color: MU, maxWidth: 600, margin: '0 auto 34px', fontWeight: 400 }}>
