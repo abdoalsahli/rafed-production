@@ -115,7 +115,7 @@ export default function LandingPage() {
           {/* pill badge */}
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '8px 16px', border: `1px solid rgba(0,35,111,0.18)`, borderRadius: 999, fontSize: 14, fontWeight: 600, color: MU2, marginBottom: 28 }}>
             <span style={{ width: 7, height: 7, borderRadius: '50%', background: A, boxShadow: `0 0 10px ${A}` }} />
-            البنية التحتية لتوزيع البطاقات مسبقة الدفع في ليبيا
+            البنية التحتية لتوزيع الكروت في ليبيا
           </div>
 
           <h1 style={{ fontSize: 'clamp(40px,5.6vw,72px)', lineHeight: 1.08, fontWeight: 900, letterSpacing: '-1.5px', margin: '0 auto 22px', maxWidth: 880 }}>
