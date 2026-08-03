@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Plus, FileDown, CheckCircle2, Truck, XCircle,
-  Loader2, ChevronLeft, AlertCircle, ClipboardList, Save,
+  Loader2, ChevronLeft, AlertCircle, ClipboardList,
 } from 'lucide-react';
 
 /* ── Status config ─────────────────────────────────────────────────────────── */
@@ -321,7 +321,7 @@ export const AllocationsPage: React.FC = () => {
       <div className="flex flex-wrap gap-2 items-center">
         {isDraft && hasUnsaved && (
           <Button onClick={handleSaveQuantities} disabled={isBusy}>
-            {saving ? <Loader2 size={14} className="animate-spin ml-1.5" /> : <Save size={15} className="ml-1.5" />}
+            {saving ? <Loader2 size={14} className="animate-spin ml-1.5" /> : <CheckCircle2 size={15} className="ml-1.5" />}
             حفظ الكميات
           </Button>
         )}
