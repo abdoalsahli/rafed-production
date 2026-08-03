@@ -59,7 +59,7 @@ export const AllocationsPage: React.FC = () => {
     { orderId: selectedOrderId! },
     { enabled: view === 'detail' && !!selectedOrderId }
   );
-  const { data: allProducts } = trpc.provider.listProducts.useQuery(undefined, { staleTime: 60_000 });
+  const { data: productsData } = trpc.provider.listProducts.useQuery({}, { staleTime: 60_000 });
 
   const createOrder  = trpc.providerAllocations.createOrder.useMutation();
   const upsertItem   = trpc.providerAllocations.upsertItem.useMutation();
@@ -237,7 +237,7 @@ export const AllocationsPage: React.FC = () => {
 
   // Products not yet in the order
   const usedProductIds = new Set((order.items ?? []).map((i: any) => i.productId));
-  const availableProducts = (allProducts ?? []).filter((p: any) => !usedProductIds.has(p.id) && p.status === 'active');
+  const availableProducts = (productsData?.products ?? []).filter((p: any) => !usedProductIds.has(p.id) && p.status === 'active');
 
   return (
     <div className="p-6 md:p-8 space-y-6">
