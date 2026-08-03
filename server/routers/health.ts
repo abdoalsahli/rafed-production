@@ -2,7 +2,7 @@
  * Health Check Router - Debugging tRPC initialization
  */
 
-import { router, publicProcedure } from '../_core/trpc';
+import { router, publicProcedure, protectedProcedure } from '../_core/trpc';
 import { getInitializationStatus, initializeQueueManager } from '../queue-manager-debug';
 
 export const healthRouter = router({
@@ -20,7 +20,7 @@ export const healthRouter = router({
   /**
    * Queue manager initialization status
    */
-  queueManager: publicProcedure.query(() => {
+  queueManager: protectedProcedure.query(() => {
     const status = getInitializationStatus();
     return {
       dbReady: status.dbReady,
@@ -32,7 +32,7 @@ export const healthRouter = router({
   /**
    * Initialize queue manager on demand
    */
-  initializeQueueManager: publicProcedure.mutation(async () => {
+  initializeQueueManager: protectedProcedure.mutation(async () => {
     try {
       const success = await initializeQueueManager();
       return {

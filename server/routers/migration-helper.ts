@@ -3,7 +3,7 @@
  * This is for development/testing only
  */
 
-import { router, publicProcedure } from "../_core/trpc";
+import { router, adminProcedure } from "../_core/trpc";
 import { getDb } from "../db";
 import { TRPCError } from "@trpc/server";
 
@@ -13,7 +13,7 @@ export const migrationHelperRouter = router({
    * Adds: display_name, face_value, currency, is_active columns
    * Creates index on status column
    */
-  applyProductsMigration: publicProcedure.mutation(async () => {
+  applyProductsMigration: adminProcedure.mutation(async () => {
     const db = await getDb();
     if (!db) throw new Error("Database connection not available");
 
