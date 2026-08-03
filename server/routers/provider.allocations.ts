@@ -14,12 +14,9 @@ import { eq, and, sql, inArray } from "drizzle-orm";
 import { pinEncryptionService } from "../services/encryption.service";
 import * as XLSX from "xlsx";
 
-const providerProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  if (ctx.user.role !== "provider" && ctx.user.role !== "admin") {
-    throw new TRPCError({ code: "FORBIDDEN", message: "Provider only" });
-  }
-  return next({ ctx });
-});
+// Authorization is enforced by getProviderIdFromUser — it throws NOT_FOUND
+// if the authenticated user has no linked service_provider record.
+const providerProcedure = protectedProcedure;
 
 export const providerAllocationsRouter = router({
   /** List all orders for this provider */
