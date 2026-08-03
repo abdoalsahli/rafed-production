@@ -95,14 +95,9 @@ export class APIKeyManagementService {
     try {
       const keyHash = this.hashKey(key);
 
-      // Mock implementation - would query database
-      // In real scenario, would look up keyHash in database
-
-      // Check if key exists and is active
-      // Check if key is expired
-      // Check rate limits
-
-      return { valid: true, distributorId: 'dist_123' };
+      // TODO: implement real DB lookup by keyHash
+      // Until then, reject all keys so no forged key can gain access.
+      return { valid: false, reason: 'API key authentication not yet implemented' };
     } catch (error) {
       console.error('[APIKeyManagement] Failed to validate API key:', error);
       return { valid: false, reason: 'Validation error' };

@@ -162,7 +162,7 @@ export const financialRouter = router({
         dateTo:     z.string().optional(),
         amountMin:  z.number().optional(),
         amountMax:  z.number().optional(),
-        searchTerm: z.string().optional(),
+        searchTerm: z.string().max(100).optional(),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -312,7 +312,7 @@ export const financialRouter = router({
         dateTo:     z.string().optional(),
         amountMin:  z.number().optional(),
         amountMax:  z.number().optional(),
-        searchTerm: z.string().optional(),
+        searchTerm: z.string().max(100).optional(),
       })
     )
     .query(async ({ ctx, input }) => {

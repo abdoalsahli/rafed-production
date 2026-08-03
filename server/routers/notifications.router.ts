@@ -2,6 +2,9 @@ import { protectedProcedure, router } from "../_core/trpc";
 import { z } from "zod";
 import { NotificationService } from "../_core/notification.service";
 import { TRPCError } from "@trpc/server";
+import { getDb } from "../db";
+import { notifications } from "../../drizzle/schema";
+import { and, eq } from "drizzle-orm";
 
 export const notificationsRouter = router({
   /**
@@ -54,9 +57,21 @@ export const notificationsRouter = router({
     )
     .mutation(async ({ ctx, input }) => {
       try {
+        const db = await getDb();
+        if (!db) throw new Error("Database not available");
+        // Verify the notification belongs to the requesting user
+        const rows = await db
+          .select({ id: notifications.id })
+          .from(notifications)
+          .where(and(eq(notifications.id, input.notificationId), eq(notifications.userId, ctx.user.id)))
+          .limit(1);
+        if (rows.length === 0) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Notification not found" });
+        }
         await NotificationService.markAsRead(input.notificationId);
         return { success: true };
       } catch (error) {
+        if (error instanceof TRPCError) throw error;
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to mark notification as read",

@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { TRPCError } from "@trpc/server";
 import { ParsedCard } from "../utils/file-parser";
+import crypto from "crypto";
 
 export interface UploadPreview {
   uploadPreviewId: string;
@@ -28,7 +29,7 @@ setInterval(() => {
 }, 60000); // Every minute
 
 export function generatePreviewId(): string {
-  return `preview_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `preview_${crypto.randomBytes(16).toString('hex')}`;
 }
 
 export function storePreview(preview: UploadPreview): void {

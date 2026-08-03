@@ -50,7 +50,7 @@ export const importProductsRouter = {
       })
     )
     .mutation(async ({ ctx, input }: any) => {
-      if (ctx.user.role !== "admin" && !ctx.user.id) {
+      if (ctx.user.role !== "admin" && ctx.user.role !== "provider") {
         throw new TRPCError({
           code: "FORBIDDEN",
           message: "Not authorized to import products",

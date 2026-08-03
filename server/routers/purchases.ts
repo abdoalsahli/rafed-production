@@ -3,7 +3,7 @@
  * Final Hardening Phase
  */
 
-import { router, publicProcedure } from '../_core/trpc';
+import { router, protectedProcedure, adminProcedure } from '../_core/trpc';
 import { z } from 'zod';
 import { getQueueManager } from '../queue-manager';
 import { getQueueConfig, setAccountOverride, clearAccountOverride } from '../queue-config';
@@ -16,7 +16,7 @@ export const purchasesRouter = router({
   /**
    * Enqueue a purchase request
    */
-  enqueue: publicProcedure
+  enqueue: protectedProcedure
     .input(
       z.object({
         providerId: z.number().int().positive(),
@@ -59,7 +59,7 @@ export const purchasesRouter = router({
   /**
    * Get status of a purchase request
    */
-  status: publicProcedure
+  status: protectedProcedure
     .input(
       z.object({
         requestId: z.number().int().positive(),
@@ -82,7 +82,7 @@ export const purchasesRouter = router({
   /**
    * Get queue metrics with alerts and ledger verification
    */
-  metrics: publicProcedure
+  metrics: protectedProcedure
     .input(
       z.object({
         providerId: z.number().int().positive(),
@@ -128,7 +128,7 @@ export const purchasesRouter = router({
   /**
    * Get queue configuration
    */
-  config: publicProcedure
+  config: protectedProcedure
     .input(
       z.object({
         providerId: z.number().int().positive().optional(),
@@ -157,7 +157,7 @@ export const purchasesRouter = router({
   /**
    * Set per-account configuration override
    */
-  setAccountConfig: publicProcedure
+  setAccountConfig: adminProcedure
     .input(
       z.object({
         providerId: z.number().int().positive(),
@@ -184,7 +184,7 @@ export const purchasesRouter = router({
   /**
    * Clear per-account configuration override
    */
-  clearAccountConfig: publicProcedure
+  clearAccountConfig: adminProcedure
     .input(
       z.object({
         providerId: z.number().int().positive(),

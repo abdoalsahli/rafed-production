@@ -16,6 +16,22 @@ import { sdk } from "../_core/sdk";
 
 const SALT_ROUNDS = 10;
 
+// Simple in-memory rate limiter: max 10 login attempts per IP per 15 minutes
+const loginAttempts = new Map<string, { count: number; resetAt: number }>();
+function checkLoginRateLimit(ip: string): void {
+  const now = Date.now();
+  const window = 15 * 60 * 1000;
+  const entry = loginAttempts.get(ip);
+  if (!entry || now > entry.resetAt) {
+    loginAttempts.set(ip, { count: 1, resetAt: now + window });
+    return;
+  }
+  entry.count++;
+  if (entry.count > 10) {
+    throw new TRPCError({ code: "TOO_MANY_REQUESTS", message: "Too many login attempts. Please try again later." });
+  }
+}
+
 export const authEmailRouter = router({
   signup: publicProcedure
     .input(
@@ -87,6 +103,9 @@ export const authEmailRouter = router({
       })
     )
     .mutation(async ({ input, ctx }) => {
+      const ip = (ctx.req.headers['x-forwarded-for'] as string | undefined)?.split(',')[0]?.trim() || ctx.req.socket?.remoteAddress || 'unknown';
+      checkLoginRateLimit(ip);
+
       const pool = await getRawDb();
       const conn = await pool.getConnection();
 
