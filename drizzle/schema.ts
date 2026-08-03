@@ -840,3 +840,50 @@ export const webhookEvents = mysqlTable("webhook_events", {
 
 export type WebhookEvent = typeof webhookEvents.$inferSelect;
 export type InsertWebhookEvent = typeof webhookEvents.$inferInsert;
+
+/* ── Allocation Orders ───────────────────────────────────────────────────────
+   Provider-side offline orders: bundle cards from multiple products and
+   hand them off to an external client (no platform account required).
+   ─────────────────────────────────────────────────────────────────────────── */
+export const allocationOrders = mysqlTable("allocation_orders", {
+  id: int("id").autoincrement().primaryKey(),
+  providerId: int("provider_id").notNull(),
+  clientName: varchar("client_name", { length: 255 }).notNull(),
+  clientPhone: varchar("client_phone", { length: 64 }),
+  clientNotes: text("client_notes"),
+  status: mysqlEnum("status", ["draft", "confirmed", "delivered", "cancelled"]).default("draft").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  confirmedAt: timestamp("confirmed_at"),
+  deliveredAt: timestamp("delivered_at"),
+}, (table) => ({
+  providerIdIdx: index("idx_ao_provider_id").on(table.providerId),
+  statusIdx: index("idx_ao_status").on(table.status),
+  fkProvider: foreignKey({ columns: [table.providerId], foreignColumns: [serviceProviders.id] }),
+}));
+
+export type AllocationOrder = typeof allocationOrders.$inferSelect;
+
+export const allocationOrderItems = mysqlTable("allocation_order_items", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("order_id").notNull(),
+  productId: int("product_id").notNull(),
+  quantityRequested: int("quantity_requested").notNull(),
+  quantityFulfilled: int("quantity_fulfilled").default(0).notNull(),
+}, (table) => ({
+  orderIdIdx: index("idx_aoi_order_id").on(table.orderId),
+  fkOrder: foreignKey({ columns: [table.orderId], foreignColumns: [allocationOrders.id] }),
+  fkProduct: foreignKey({ columns: [table.productId], foreignColumns: [products.id] }),
+}));
+
+export type AllocationOrderItem = typeof allocationOrderItems.$inferSelect;
+
+export const allocationOrderCards = mysqlTable("allocation_order_cards", {
+  id: int("id").autoincrement().primaryKey(),
+  orderItemId: int("order_item_id").notNull(),
+  cardId: int("card_id").notNull(),
+}, (table) => ({
+  orderItemIdIdx: index("idx_aoc_order_item_id").on(table.orderItemId),
+  cardIdUq: uniqueIndex("idx_aoc_card_id").on(table.cardId),
+  fkOrderItem: foreignKey({ columns: [table.orderItemId], foreignColumns: [allocationOrderItems.id] }),
+  fkCard: foreignKey({ columns: [table.cardId], foreignColumns: [cards.id] }),
+}));

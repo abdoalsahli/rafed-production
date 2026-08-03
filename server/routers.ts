@@ -28,6 +28,7 @@ import { authEmailRouter } from "./routers/auth-email.router";
 import { debugRouter } from "./routers/debug.router";
 import { webhookResilienceRouter } from "./routers/webhook.resilience.router";
 import { userRouter } from "./routers/user.router";
+import { providerAllocationsRouter } from "./routers/provider.allocations";
 
 
 
@@ -122,6 +123,7 @@ export const appRouter = router({
   debug: debugRouter,
   webhookResilience: webhookResilienceRouter,
   user: userRouter,
+  providerAllocations: providerAllocationsRouter,
 
   // TODO: add feature routers here, e.g.
   // todo: router({

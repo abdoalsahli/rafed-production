@@ -15,6 +15,7 @@ import {
   Truck,
   Wallet,
   Code2,
+  ClipboardList,
 } from 'lucide-react';
 
 export type NavItem = {
@@ -41,6 +42,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
   { label: 'الموزعون',      path: '/provider/distributors',icon: Users2,            roles: ['provider'] },
   { label: 'طلبات الربط',   path: '/provider/requests',    icon: Link2,             roles: ['provider'] },
   { label: 'العمليات',      path: '/provider/transactions', icon: Receipt,          roles: ['provider'] },
+  { label: 'الطلبات',       path: '/provider/allocations', icon: ClipboardList,     roles: ['provider'] },
   { label: 'الإعدادات',     path: '/provider/settings',    icon: SlidersHorizontal, roles: ['provider'] },
 
   /* ── Distributor ────────────────────────────────────────────────────── */

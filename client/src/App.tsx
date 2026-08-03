@@ -20,6 +20,7 @@ import { RequestsPage } from "./pages/provider/RequestsPage";
 import { ProductsPage } from "./pages/provider/ProductsPage";
 import ProviderTransactionsPage from "./pages/provider/TransactionsPage";
 import { ProviderSettingsPage } from "./pages/provider/SettingsPage";
+import { AllocationsPage } from "./pages/provider/AllocationsPage";
 import { AlertsPageV2 } from "./pages/distributor/AlertsPageV2";
 import { ConnectProviderPage } from "./pages/distributor/ConnectProviderPage";
 import { ProviderAccountsPage } from "./pages/distributor/ProviderAccountsPage";
@@ -169,6 +170,7 @@ function Router() {
       <Route path="/provider/requests" component={Protected(RequestsPage, ['provider'])} />
       <Route path="/provider/products" component={Protected(ProductsPage, ['provider'])} />
       <Route path="/provider/settings" component={Protected(ProviderSettingsPage, ['provider'])} />
+      <Route path="/provider/allocations" component={Protected(AllocationsPage, ['provider'])} />
       <Route path="/queue-dashboard" component={Protected(QueueDashboard, ['admin'])} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}      <Route component={NotFound} />
