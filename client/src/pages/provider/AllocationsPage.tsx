@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
-  Package, Plus, FileDown, CheckCircle2, Truck, XCircle,
-  Loader2, ChevronLeft, Trash2, AlertCircle, ClipboardList,
+  Plus, FileDown, CheckCircle2, Truck, XCircle,
+  Loader2, ChevronLeft, AlertCircle, ClipboardList, Save,
 } from 'lucide-react';
 
 /* ── Status config ─────────────────────────────────────────────────────────── */
 type OrderStatus = 'draft' | 'confirmed' | 'delivered' | 'cancelled';
 
 const STATUS_CONFIG: Record<OrderStatus, { label: string; pill: string }> = {
-  draft:     { label: 'مسودة',    pill: 'bg-slate-100 text-slate-600 border-slate-200' },
-  confirmed: { label: 'مؤكد',     pill: 'bg-blue-100 text-blue-700 border-blue-200' },
+  draft:     { label: 'مسودة',      pill: 'bg-slate-100 text-slate-600 border-slate-200' },
+  confirmed: { label: 'مؤكد',       pill: 'bg-blue-100 text-blue-700 border-blue-200' },
   delivered: { label: 'تم التسليم', pill: 'bg-green-100 text-green-700 border-green-200' },
-  cancelled: { label: 'ملغى',     pill: 'bg-red-100 text-red-600 border-red-200' },
+  cancelled: { label: 'ملغى',       pill: 'bg-red-100 text-red-600 border-red-200' },
 };
 
 /* ── helpers ───────────────────────────────────────────────────────────────── */
@@ -29,9 +29,7 @@ function b64ToBlob(b64: string, mime: string) {
 function triggerDownload(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
-  a.href = url;
-  a.download = filename;
-  a.click();
+  a.href = url; a.download = filename; a.click();
   URL.revokeObjectURL(url);
 }
 
@@ -44,56 +42,95 @@ export const AllocationsPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   /* ── New order form ── */
-  const [newClient, setNewClient]     = useState('');
-  const [newPhone, setNewPhone]       = useState('');
-  const [newNotes, setNewNotes]       = useState('');
+  const [newClient, setNewClient] = useState('');
+  const [newPhone, setNewPhone]   = useState('');
+  const [newNotes, setNewNotes]   = useState('');
 
-  /* ── Add item form ── */
-  const [addProductId, setAddProductId] = useState<number | ''>('');
-  const [addQty, setAddQty]             = useState(1);
+  /* ── Quantity map: productId → qty string ('' = not selected) ── */
+  const [qtyMap, setQtyMap] = useState<Record<number, string>>({});
+  const [saving, setSaving] = useState(false);
 
   const utils = trpc.useUtils();
 
-  const { data: orders, isLoading: ordersLoading } = trpc.providerAllocations.listOrders.useQuery(undefined, { enabled: view === 'list' });
-  const { data: order, isLoading: orderLoading }   = trpc.providerAllocations.getOrder.useQuery(
+  const { data: orders, isLoading: ordersLoading } = trpc.providerAllocations.listOrders.useQuery(
+    undefined, { enabled: view === 'list' }
+  );
+  const { data: order, isLoading: orderLoading } = trpc.providerAllocations.getOrder.useQuery(
     { orderId: selectedOrderId! },
     { enabled: view === 'detail' && !!selectedOrderId }
   );
-  const { data: productsData } = trpc.provider.listProducts.useQuery({}, { staleTime: 60_000 });
+  const { data: productsData } = trpc.provider.listProducts.useQuery(
+    {}, { staleTime: 60_000, enabled: view === 'detail' }
+  );
 
-  const createOrder  = trpc.providerAllocations.createOrder.useMutation();
-  const upsertItem   = trpc.providerAllocations.upsertItem.useMutation();
-  const removeItem   = trpc.providerAllocations.removeItem.useMutation();
-  const confirmOrder = trpc.providerAllocations.confirmOrder.useMutation();
+  const createOrder   = trpc.providerAllocations.createOrder.useMutation();
+  const upsertItem    = trpc.providerAllocations.upsertItem.useMutation();
+  const removeItem    = trpc.providerAllocations.removeItem.useMutation();
+  const confirmOrder  = trpc.providerAllocations.confirmOrder.useMutation();
   const markDelivered = trpc.providerAllocations.markDelivered.useMutation();
-  const cancelOrder  = trpc.providerAllocations.cancelOrder.useMutation();
-  const exportExcel  = trpc.providerAllocations.exportExcel.useMutation();
+  const cancelOrder   = trpc.providerAllocations.cancelOrder.useMutation();
+  const exportExcel   = trpc.providerAllocations.exportExcel.useMutation();
 
   const refetchAll = () => {
     utils.providerAllocations.listOrders.invalidate();
     if (selectedOrderId) utils.providerAllocations.getOrder.invalidate({ orderId: selectedOrderId });
   };
 
+  /* Sync qtyMap with order items whenever order loads/changes */
+  useEffect(() => {
+    if (!order?.items) return;
+    const initial: Record<number, string> = {};
+    for (const item of order.items as any[]) {
+      initial[item.productId] = String(item.quantityRequested);
+    }
+    setQtyMap(initial);
+  }, [order]);
+
+  /* ── handlers ── */
   const handleCreateOrder = async () => {
     if (!newClient.trim()) return;
     setError(null);
     try {
-      const { orderId } = await createOrder.mutateAsync({ clientName: newClient.trim(), clientPhone: newPhone.trim() || undefined, clientNotes: newNotes.trim() || undefined });
+      const { orderId } = await createOrder.mutateAsync({
+        clientName: newClient.trim(),
+        clientPhone: newPhone.trim() || undefined,
+        clientNotes: newNotes.trim() || undefined,
+      });
       setSelectedOrderId(orderId);
       setView('detail');
       setNewClient(''); setNewPhone(''); setNewNotes('');
-      refetchAll();
     } catch (e: any) { setError(e.message); }
   };
 
-  const handleAddItem = async () => {
-    if (!addProductId || !selectedOrderId) return;
+  const handleSaveQuantities = async () => {
+    if (!selectedOrderId || !order) return;
     setError(null);
+    setSaving(true);
     try {
-      await upsertItem.mutateAsync({ orderId: selectedOrderId, productId: Number(addProductId), quantity: addQty });
-      setAddProductId(''); setAddQty(1);
+      const allProducts: any[] = productsData?.products ?? [];
+      // Remove items whose qty was cleared
+      for (const item of order.items as any[]) {
+        const q = parseInt(qtyMap[item.productId] ?? '0', 10);
+        if (!q || q <= 0) {
+          await removeItem.mutateAsync({ itemId: item.id });
+        }
+      }
+      // Upsert every product that has qty > 0
+      for (const [pidStr, qtyStr] of Object.entries(qtyMap)) {
+        const pid = Number(pidStr);
+        const qty = parseInt(qtyStr, 10);
+        if (!qty || qty <= 0) continue;
+        // Only upsert active products that belong to this provider
+        const product = allProducts.find((p: any) => p.id === pid);
+        if (!product || product.status !== 'active') continue;
+        await upsertItem.mutateAsync({ orderId: selectedOrderId, productId: pid, quantity: qty });
+      }
       refetchAll();
-    } catch (e: any) { setError(e.message); }
+    } catch (e: any) {
+      setError(e.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleConfirm = async () => {
@@ -133,7 +170,7 @@ export const AllocationsPage: React.FC = () => {
     } catch (e: any) { setError(e.message); }
   };
 
-  /* ── LIST VIEW ────────────────────────────────────────────────────────────── */
+  /* ══ LIST VIEW ══════════════════════════════════════════════════════════════ */
   if (view === 'list') return (
     <div className="p-6 md:p-8 space-y-6">
       <PageHeader title="الطلبات والتخصيصات" subtitle="أنشئ طلب تخصيص كروت وسلّمه لعميلك مع ملف Excel" />
@@ -186,14 +223,14 @@ export const AllocationsPage: React.FC = () => {
     </div>
   );
 
-  /* ── CREATE VIEW ──────────────────────────────────────────────────────────── */
+  /* ══ CREATE VIEW ════════════════════════════════════════════════════════════ */
   if (view === 'create') return (
     <div className="p-6 md:p-8 space-y-6 max-w-lg">
       <div className="flex items-center gap-3">
         <button onClick={() => setView('list')} className="text-muted-foreground hover:text-foreground transition-colors">
           <ChevronLeft size={20} />
         </button>
-        <PageHeader title="طلب جديد" subtitle="أدخل بيانات العميل ثم أضف المنتجات" />
+        <PageHeader title="طلب جديد" subtitle="أدخل بيانات العميل" />
       </div>
 
       {error && (
@@ -216,13 +253,13 @@ export const AllocationsPage: React.FC = () => {
           <Input value={newNotes} onChange={(e) => setNewNotes(e.target.value)} placeholder="أي معلومات إضافية…" />
         </div>
         <Button className="w-full" onClick={handleCreateOrder} disabled={!newClient.trim() || createOrder.isPending}>
-          {createOrder.isPending ? <><Loader2 size={14} className="animate-spin ml-1.5" />جاري الإنشاء…</> : 'إنشاء الطلب'}
+          {createOrder.isPending ? <><Loader2 size={14} className="animate-spin ml-1.5" />جاري الإنشاء…</> : 'التالي: تحديد الكميات'}
         </Button>
       </div>
     </div>
   );
 
-  /* ── DETAIL VIEW ──────────────────────────────────────────────────────────── */
+  /* ══ DETAIL VIEW ════════════════════════════════════════════════════════════ */
   if (!order && orderLoading) return (
     <div className="flex items-center gap-2 text-muted-foreground py-32 justify-center">
       <Loader2 size={18} className="animate-spin" /> جاري التحميل…
@@ -231,25 +268,42 @@ export const AllocationsPage: React.FC = () => {
   if (!order) return null;
 
   const cfg = STATUS_CONFIG[order.status as OrderStatus] ?? STATUS_CONFIG.draft;
-  const isDraft = order.status === 'draft';
+  const isDraft     = order.status === 'draft';
   const isConfirmed = order.status === 'confirmed';
-  const isBusy = confirmOrder.isPending || markDelivered.isPending || cancelOrder.isPending || exportExcel.isPending || upsertItem.isPending || removeItem.isPending;
+  const isBusy = confirmOrder.isPending || markDelivered.isPending || cancelOrder.isPending ||
+                 exportExcel.isPending || saving;
 
-  // Products not yet in the order
-  const usedProductIds = new Set((order.items ?? []).map((i: any) => i.productId));
-  const availableProducts = (productsData?.products ?? []).filter((p: any) => !usedProductIds.has(p.id) && p.status === 'active');
+  const allProducts: any[] = productsData?.products ?? [];
+  const activeProducts = allProducts.filter((p: any) => p.status === 'active');
+
+  /* Total cards across all qty inputs */
+  const totalCards = Object.values(qtyMap).reduce((sum, v) => sum + (parseInt(v, 10) || 0), 0);
+
+  /* Check if qtyMap differs from saved order items */
+  const savedQty: Record<number, number> = {};
+  for (const item of order.items as any[]) savedQty[item.productId] = item.quantityRequested;
+  const hasUnsaved = isDraft && activeProducts.some((p: any) => {
+    const current = parseInt(qtyMap[p.id] ?? '0', 10) || 0;
+    const saved = savedQty[p.id] ?? 0;
+    return current !== saved;
+  });
 
   return (
     <div className="p-6 md:p-8 space-y-6">
       {/* Header */}
       <div className="flex items-start gap-3">
-        <button onClick={() => { setView('list'); setSelectedOrderId(null); }} className="text-muted-foreground hover:text-foreground transition-colors mt-1">
+        <button
+          onClick={() => { setView('list'); setSelectedOrderId(null); }}
+          className="text-muted-foreground hover:text-foreground transition-colors mt-1"
+        >
           <ChevronLeft size={20} />
         </button>
         <div className="flex-1">
           <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-xl font-bold">{order.clientName}</h1>
-            <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold ${cfg.pill}`}>{cfg.label}</span>
+            <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold ${cfg.pill}`}>
+              {cfg.label}
+            </span>
           </div>
           {order.clientPhone && <p className="text-sm text-muted-foreground mt-0.5">{order.clientPhone}</p>}
           {order.clientNotes && <p className="text-sm text-muted-foreground">{order.clientNotes}</p>}
@@ -264,9 +318,15 @@ export const AllocationsPage: React.FC = () => {
       )}
 
       {/* Action bar */}
-      <div className="flex flex-wrap gap-2">
-        {isDraft && (
-          <Button onClick={handleConfirm} disabled={!order.items?.length || isBusy}>
+      <div className="flex flex-wrap gap-2 items-center">
+        {isDraft && hasUnsaved && (
+          <Button onClick={handleSaveQuantities} disabled={isBusy}>
+            {saving ? <Loader2 size={14} className="animate-spin ml-1.5" /> : <Save size={15} className="ml-1.5" />}
+            حفظ الكميات
+          </Button>
+        )}
+        {isDraft && !hasUnsaved && (order.items as any[])?.length > 0 && (
+          <Button onClick={handleConfirm} disabled={isBusy}>
             {confirmOrder.isPending ? <Loader2 size={14} className="animate-spin ml-1.5" /> : <CheckCircle2 size={15} className="ml-1.5" />}
             تأكيد الطلب
           </Button>
@@ -299,85 +359,96 @@ export const AllocationsPage: React.FC = () => {
             <Plus size={15} className="ml-1.5" /> إنشاء طلب جديد
           </Button>
         )}
+        {isDraft && totalCards > 0 && (
+          <span className="text-sm text-muted-foreground mr-auto">
+            إجمالي: <strong>{totalCards}</strong> كرت
+          </span>
+        )}
       </div>
 
-      {/* Items table */}
+      {/* Products table */}
       <div className="rounded-2xl border bg-white shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b font-semibold text-sm">المنتجات</div>
+        <div className="px-5 py-4 border-b font-semibold text-sm flex items-center justify-between">
+          <span>المنتجات</span>
+          {isDraft && hasUnsaved && (
+            <span className="text-xs text-amber-600 font-normal">• تغييرات غير محفوظة</span>
+          )}
+        </div>
 
-        {!order.items?.length ? (
-          <p className="text-center text-muted-foreground py-10 text-sm">لم يُضف أي منتج بعد.</p>
+        {activeProducts.length === 0 ? (
+          <p className="text-center text-muted-foreground py-10 text-sm">
+            {productsData ? 'لا توجد منتجات نشطة.' : 'جاري التحميل…'}
+          </p>
         ) : (
           <table className="w-full text-sm">
             <thead className="bg-slate-50 text-muted-foreground text-xs">
               <tr>
                 <th className="text-right px-5 py-2.5 font-medium">المنتج</th>
-                <th className="text-center px-4 py-2.5 font-medium">المطلوب</th>
-                <th className="text-center px-4 py-2.5 font-medium">المتاح</th>
-                <th className="text-center px-4 py-2.5 font-medium">المنجز</th>
-                {isDraft && <th className="px-4 py-2.5" />}
+                {(isConfirmed || order.status === 'delivered') && (
+                  <th className="text-center px-4 py-2.5 font-medium">المتاح</th>
+                )}
+                <th className="text-center px-4 py-2.5 font-medium w-32">
+                  {isDraft ? 'الكمية المطلوبة' : 'المطلوب'}
+                </th>
+                {(isConfirmed || order.status === 'delivered') && (
+                  <th className="text-center px-4 py-2.5 font-medium">المنجز</th>
+                )}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {order.items.map((item: any) => (
-                <tr key={item.id}>
-                  <td className="px-5 py-3 font-medium">{item.productDisplayName || item.productName}</td>
-                  <td className="px-4 py-3 text-center">{item.quantityRequested}</td>
-                  <td className={`px-4 py-3 text-center font-semibold ${item.availableStock < item.quantityRequested ? 'text-red-600' : 'text-green-600'}`}>
-                    {item.availableStock}
-                  </td>
-                  <td className="px-4 py-3 text-center">{item.quantityFulfilled}</td>
-                  {isDraft && (
-                    <td className="px-4 py-3 text-center">
-                      <button
-                        onClick={async () => { setError(null); try { await removeItem.mutateAsync({ itemId: item.id }); refetchAll(); } catch (e: any) { setError(e.message); } }}
-                        className="text-muted-foreground hover:text-red-600 transition-colors"
-                        disabled={isBusy}
-                      >
-                        <Trash2 size={15} />
-                      </button>
+              {activeProducts.map((product: any) => {
+                const savedItem = (order.items as any[])?.find((i: any) => i.productId === product.id);
+                const qty = qtyMap[product.id] ?? '';
+                const hasQty = parseInt(qty, 10) > 0;
+
+                return (
+                  <tr
+                    key={product.id}
+                    className={hasQty ? 'bg-blue-50/40' : ''}
+                  >
+                    <td className="px-5 py-3">
+                      <p className="font-medium">{product.displayName || product.name}</p>
+                      {savedItem && !isDraft && (
+                        <p className="text-xs text-muted-foreground">{product.displayName || product.name}</p>
+                      )}
                     </td>
-                  )}
-                </tr>
-              ))}
+                    {(isConfirmed || order.status === 'delivered') && (
+                      <td className={`px-4 py-3 text-center font-semibold text-xs ${
+                        savedItem && savedItem.availableStock < savedItem.quantityRequested
+                          ? 'text-red-600' : 'text-green-600'
+                      }`}>
+                        {savedItem?.availableStock ?? '—'}
+                      </td>
+                    )}
+                    <td className="px-4 py-3 text-center">
+                      {isDraft ? (
+                        <Input
+                          type="number"
+                          min={0}
+                          value={qty}
+                          onChange={(e) => {
+                            const v = e.target.value;
+                            setQtyMap((prev) => ({ ...prev, [product.id]: v }));
+                          }}
+                          className="w-24 mx-auto text-center h-8 text-sm"
+                          placeholder="0"
+                        />
+                      ) : (
+                        <span className={savedItem ? 'font-semibold' : 'text-muted-foreground'}>
+                          {savedItem?.quantityRequested ?? '—'}
+                        </span>
+                      )}
+                    </td>
+                    {(isConfirmed || order.status === 'delivered') && (
+                      <td className="px-4 py-3 text-center">{savedItem?.quantityFulfilled ?? '—'}</td>
+                    )}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         )}
       </div>
-
-      {/* Add item — only in draft */}
-      {isDraft && availableProducts.length > 0 && (
-        <div className="rounded-2xl border bg-white shadow-sm p-5 space-y-3">
-          <p className="text-sm font-semibold">إضافة منتج</p>
-          <div className="flex gap-3 flex-wrap">
-            <select
-              value={addProductId}
-              onChange={(e) => setAddProductId(Number(e.target.value) || '')}
-              className="flex-1 min-w-[180px] h-9 rounded-md border border-input bg-background px-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary"
-            >
-              <option value="">— اختر منتجاً —</option>
-              {availableProducts.map((p: any) => (
-                <option key={p.id} value={p.id}>{p.displayName || p.name}</option>
-              ))}
-            </select>
-            <Input
-              type="number"
-              min={1}
-              value={addQty}
-              onChange={(e) => setAddQty(Math.max(1, Number(e.target.value)))}
-              className="w-24"
-              placeholder="الكمية"
-            />
-            <Button onClick={handleAddItem} disabled={!addProductId || isBusy}>
-              {upsertItem.isPending ? <Loader2 size={14} className="animate-spin" /> : <Plus size={15} />}
-            </Button>
-          </div>
-        </div>
-      )}
-
-      {isDraft && availableProducts.length === 0 && order.items?.length > 0 && (
-        <p className="text-sm text-muted-foreground text-center py-2">تم إضافة جميع المنتجات المتاحة.</p>
-      )}
     </div>
   );
 };
