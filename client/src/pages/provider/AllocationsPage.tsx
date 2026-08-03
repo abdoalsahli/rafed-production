@@ -294,6 +294,11 @@ export const AllocationsPage: React.FC = () => {
             إلغاء الطلب
           </Button>
         )}
+        {order.status === 'cancelled' && (
+          <Button onClick={() => setView('create')} variant="outline">
+            <Plus size={15} className="ml-1.5" /> إنشاء طلب جديد
+          </Button>
+        )}
       </div>
 
       {/* Items table */}

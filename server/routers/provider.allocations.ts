@@ -104,19 +104,19 @@ export const providerAllocationsRouter = router({
       clientNotes: z.string().max(1000).optional(),
     }))
     .mutation(async ({ ctx, input }) => {
-      const db = await getDb();
-      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
       const providerId = await getProviderIdFromUser(ctx.user.id);
-
-      const result = await db.insert(allocationOrders).values({
-        providerId,
-        clientName: input.clientName,
-        clientPhone: input.clientPhone,
-        clientNotes: input.clientNotes,
-        status: "draft",
-      });
-
-      return { orderId: result[0].insertId };
+      const pool = await getRawDb();
+      const conn = await pool.getConnection();
+      try {
+        const [result]: any = await conn.execute(
+          `INSERT INTO allocation_orders (provider_id, client_name, client_phone, client_notes, status, created_at)
+           VALUES (?, ?, ?, ?, 'draft', NOW())`,
+          [providerId, input.clientName, input.clientPhone ?? null, input.clientNotes ?? null]
+        );
+        return { orderId: result.insertId as number };
+      } finally {
+        conn.release();
+      }
     }),
 
   /** Add or update a product line in a draft order */
