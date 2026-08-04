@@ -50,7 +50,7 @@ function triggerDownload(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 function fmtCurrency(val: number, currency = 'LYD') {
-  return `${val.toLocaleString('ar-LY')} ${currency}`;
+  return `${val.toLocaleString('en-US')} ${currency}`;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════
