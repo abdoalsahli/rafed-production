@@ -101,6 +101,12 @@ export const providerAllocationsRouter = router({
           faceValue: products.faceValue,
           currency: products.currency,
           status: products.status,
+          availableStock: sql<number>`(
+            SELECT COUNT(*) FROM cards c
+            WHERE c.provider_id = ${providerId}
+              AND c.product_id = ${products.id}
+              AND c.status = 'AVAILABLE'
+          )`,
         })
         .from(products)
         .where(and(eq(products.providerId, providerId), eq(products.status, "active")));
@@ -376,6 +382,32 @@ export const providerAllocationsRouter = router({
       } finally {
         conn.release();
       }
+
+      return { success: true };
+    }),
+
+  /** Permanently delete a draft order */
+  deleteOrder: providerProcedure
+    .input(z.object({ orderId: z.number().int().positive() }))
+    .mutation(async ({ ctx, input }) => {
+      const db = await getDb();
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "DB unavailable" });
+      const providerId = await getProviderIdFromUser(ctx.user.id);
+
+      const [order] = await db
+        .select()
+        .from(allocationOrders)
+        .where(and(eq(allocationOrders.id, input.orderId), eq(allocationOrders.providerId, providerId)))
+        .limit(1);
+
+      if (!order) throw new TRPCError({ code: "NOT_FOUND", message: "Order not found" });
+      if (order.status !== "draft") {
+        throw new TRPCError({ code: "BAD_REQUEST", message: "Only draft orders can be deleted" });
+      }
+
+      // Delete items first (FK constraint)
+      await db.delete(allocationOrderItems).where(eq(allocationOrderItems.orderId, input.orderId));
+      await db.delete(allocationOrders).where(eq(allocationOrders.id, input.orderId));
 
       return { success: true };
     }),
