@@ -498,7 +498,7 @@ export const AllocationsPage: React.FC = () => {
                 <tr className="text-xs text-muted-foreground border-b">
                   <th className="text-right px-5 py-2.5 font-medium">المنتج</th>
                   <th className="text-center px-4 py-2.5 font-medium">المتاح</th>
-                  <th className="text-center px-4 py-2.5 font-medium w-36">
+                  <th className="text-center px-4 py-2.5 font-medium" style={{ width: '8rem', minWidth: '8rem', maxWidth: '8rem' }}>
                     {isDraft ? 'الكمية' : 'المطلوب'}
                   </th>
                   {(isConfirmed || isDelivered) && (
@@ -545,16 +545,17 @@ export const AllocationsPage: React.FC = () => {
                       </td>
 
                       {/* Quantity input or display */}
-                      <td className="px-4 py-3 text-center">
+                      <td className="py-3 text-center" style={{ width: '8rem', minWidth: '8rem', maxWidth: '8rem' }}>
                         {isDraft ? (
                           <Input
                             type="number"
                             min={0}
                             value={qtyStr}
                             onChange={(e) => setQtyMap((prev) => ({ ...prev, [product.id]: e.target.value }))}
-                            className={`w-24 mx-auto text-center h-9 text-sm font-medium ${
+                            className={`mx-auto text-center h-9 text-sm font-medium [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
                               isOver ? 'border-red-400 focus-visible:ring-red-400 bg-red-50' : ''
                             }`}
+                            style={{ width: '6rem', minWidth: '6rem', maxWidth: '6rem' }}
                             placeholder="0"
                           />
                         ) : (
