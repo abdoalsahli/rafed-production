@@ -71,7 +71,7 @@ export const AllocationsPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
 
   /* Confirmation dialog */
-  const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
+  const [pendingAction, setPendingAction] = useState<{ orderId: number; action: ConfirmAction } | null>(null);
 
   const utils = trpc.useUtils();
 
@@ -147,17 +147,16 @@ export const AllocationsPage: React.FC = () => {
     }
   };
 
-  const executeConfirmedAction = async (action: ConfirmAction) => {
-    if (!selectedOrderId) return;
+  const executeConfirmedAction = async (orderId: number, action: ConfirmAction) => {
     setError(null);
     try {
-      if (action === 'confirm')  { await confirmOrder.mutateAsync({ orderId: selectedOrderId }); refetchAll(); }
-      if (action === 'deliver')  { await markDelivered.mutateAsync({ orderId: selectedOrderId }); refetchAll(); }
-      if (action === 'cancel')   { await cancelOrder.mutateAsync({ orderId: selectedOrderId }); refetchAll(); }
+      if (action === 'confirm')  { await confirmOrder.mutateAsync({ orderId }); refetchAll(); }
+      if (action === 'deliver')  { await markDelivered.mutateAsync({ orderId }); refetchAll(); }
+      if (action === 'cancel')   { await cancelOrder.mutateAsync({ orderId }); refetchAll(); }
       if (action === 'delete')   {
-        await deleteOrder.mutateAsync({ orderId: selectedOrderId });
+        await deleteOrder.mutateAsync({ orderId });
+        if (selectedOrderId === orderId) { setSelectedOrderId(null); }
         setView('list');
-        setSelectedOrderId(null);
         refetchAll();
       }
     } catch (e: any) { setError(e.message); }
@@ -173,7 +172,42 @@ export const AllocationsPage: React.FC = () => {
   };
 
   /* ══ LIST VIEW ══════════════════════════════════════════════════════════════ */
+  const isActionBusy = confirmOrder.isPending || markDelivered.isPending ||
+                       cancelOrder.isPending || deleteOrder.isPending;
+  const sharedDialog = (
+    <AlertDialog open={!!pendingAction} onOpenChange={(open) => { if (!open) setPendingAction(null); }}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle className={pendingAction && CONFIRM_DIALOG[pendingAction.action].destructive ? 'text-red-600' : ''}>
+            {pendingAction && CONFIRM_DIALOG[pendingAction.action].title}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {pendingAction && CONFIRM_DIALOG[pendingAction.action].description}
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={isActionBusy}>إلغاء</AlertDialogCancel>
+          <AlertDialogAction
+            disabled={isActionBusy}
+            className={pendingAction && CONFIRM_DIALOG[pendingAction.action].destructive ? 'bg-red-600 hover:bg-red-700 text-white' : ''}
+            onClick={async () => {
+              if (!pendingAction) return;
+              const { orderId, action } = pendingAction;
+              setPendingAction(null);
+              await executeConfirmedAction(orderId, action);
+            }}
+          >
+            {isActionBusy ? <Loader2 size={14} className="animate-spin ml-1.5" /> : null}
+            {pendingAction && CONFIRM_DIALOG[pendingAction.action].actionLabel}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+
   if (view === 'list') return (
+    <>
+      {sharedDialog}
     <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
@@ -201,35 +235,66 @@ export const AllocationsPage: React.FC = () => {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {orders.map((o) => {
             const cfg = STATUS_CONFIG[o.status as OrderStatus] ?? STATUS_CONFIG.draft;
+            const isDraftCard = o.status === 'draft';
+            const isConfirmedCard = o.status === 'confirmed';
             return (
-              <button
+              <div
                 key={o.id}
-                onClick={() => { setSelectedOrderId(o.id); setView('detail'); setError(null); }}
-                className="rounded-2xl border bg-white p-5 text-right shadow-sm hover:shadow-md hover:border-primary/30 transition-all flex flex-col gap-4 group"
+                className="rounded-2xl border bg-white shadow-sm hover:shadow-md hover:border-primary/30 transition-all flex flex-col gap-4 group relative"
               >
-                <div className="flex items-start justify-between gap-2">
-                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cfg.pill}`}>{cfg.label}</span>
-                  <p className="font-bold text-base leading-snug group-hover:text-primary transition-colors">{o.clientName}</p>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="rounded-xl bg-slate-50 px-3 py-2.5 text-right">
-                    <p className="text-[11px] text-muted-foreground mb-0.5">المنتجات</p>
-                    <p className="font-bold text-lg leading-none">{o.lineCount}</p>
+                <button
+                  onClick={() => { setSelectedOrderId(o.id); setView('detail'); setError(null); }}
+                  className="p-5 text-right flex flex-col gap-4 flex-1 w-full"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cfg.pill}`}>{cfg.label}</span>
+                    <p className="font-bold text-base leading-snug group-hover:text-primary transition-colors">{o.clientName}</p>
                   </div>
-                  <div className="rounded-xl bg-slate-50 px-3 py-2.5 text-right">
-                    <p className="text-[11px] text-muted-foreground mb-0.5">إجمالي الكروت</p>
-                    <p className="font-bold text-lg leading-none">{o.totalRequested}</p>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-xl bg-slate-50 px-3 py-2.5 text-right">
+                      <p className="text-[11px] text-muted-foreground mb-0.5">المنتجات</p>
+                      <p className="font-bold text-lg leading-none">{o.lineCount}</p>
+                    </div>
+                    <div className="rounded-xl bg-slate-50 px-3 py-2.5 text-right">
+                      <p className="text-[11px] text-muted-foreground mb-0.5">إجمالي الكروت</p>
+                      <p className="font-bold text-lg leading-none">{o.totalRequested}</p>
+                    </div>
                   </div>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {new Date(o.createdAt).toLocaleDateString('ar-LY', { year: 'numeric', month: 'long', day: 'numeric' })}
-                </p>
-              </button>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(o.createdAt).toLocaleDateString('ar-LY', { year: 'numeric', month: 'long', day: 'numeric' })}
+                  </p>
+                </button>
+
+                {/* Inline action buttons */}
+                {(isDraftCard || isConfirmedCard) && (
+                  <div className="px-5 pb-4 flex justify-end gap-2 -mt-2">
+                    {isDraftCard && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setPendingAction({ orderId: o.id, action: 'delete' }); }}
+                        className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition-colors border border-red-200"
+                        title="حذف المسودة"
+                      >
+                        <Trash2 size={12} /> حذف
+                      </button>
+                    )}
+                    {isConfirmedCard && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setPendingAction({ orderId: o.id, action: 'cancel' }); }}
+                        className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 px-2.5 py-1.5 rounded-lg transition-colors border border-red-200"
+                        title="إلغاء الطلب"
+                      >
+                        <XCircle size={12} /> إلغاء
+                      </button>
+                    )}
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>
       )}
     </div>
+    </>
   );
 
   /* ══ CREATE VIEW ════════════════════════════════════════════════════════════ */
@@ -331,37 +396,9 @@ export const AllocationsPage: React.FC = () => {
   /* Detect a single currency for display (use first product's currency or LYD) */
   const currency = activeProducts[0]?.currency || 'LYD';
 
-  /* ── Confirmation dialog ── */
-  const dialogCfg = confirmAction ? CONFIRM_DIALOG[confirmAction] : null;
-
   return (
     <>
-      {/* Confirmation Dialog */}
-      <AlertDialog open={!!confirmAction} onOpenChange={(open) => { if (!open) setConfirmAction(null); }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className={dialogCfg?.destructive ? 'text-red-600' : ''}>
-              {dialogCfg?.title}
-            </AlertDialogTitle>
-            <AlertDialogDescription>{dialogCfg?.description}</AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isBusy}>إلغاء</AlertDialogCancel>
-            <AlertDialogAction
-              disabled={isBusy}
-              className={dialogCfg?.destructive ? 'bg-red-600 hover:bg-red-700 text-white' : ''}
-              onClick={async () => {
-                const action = confirmAction!;
-                setConfirmAction(null);
-                await executeConfirmedAction(action);
-              }}
-            >
-              {isBusy ? <Loader2 size={14} className="animate-spin ml-1.5" /> : null}
-              {dialogCfg?.actionLabel}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      {sharedDialog}
 
       <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-5">
 
@@ -419,12 +456,12 @@ export const AllocationsPage: React.FC = () => {
             </Button>
           )}
           {isDraft && !hasUnsaved && orderItems.length > 0 && (
-            <Button onClick={() => setConfirmAction('confirm')} disabled={isBusy} className="gap-1.5">
+            <Button onClick={() => setPendingAction({ orderId: selectedOrderId!, action: 'confirm' })} disabled={isBusy} className="gap-1.5">
               <CheckCircle2 size={15} /> تأكيد الطلب
             </Button>
           )}
           {isConfirmed && (
-            <Button onClick={() => setConfirmAction('deliver')} disabled={isBusy} className="gap-1.5">
+            <Button onClick={() => setPendingAction({ orderId: selectedOrderId!, action: 'deliver' })} disabled={isBusy} className="gap-1.5">
               <Truck size={15} /> تسليم
             </Button>
           )}
@@ -439,13 +476,13 @@ export const AllocationsPage: React.FC = () => {
           <div className="mr-auto flex gap-2">
             {isDraft && (
               <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 gap-1.5"
-                onClick={() => setConfirmAction('delete')} disabled={isBusy}>
+                onClick={() => setPendingAction({ orderId: selectedOrderId!, action: 'delete' })} disabled={isBusy}>
                 <Trash2 size={14} /> حذف المسودة
               </Button>
             )}
             {isConfirmed && (
               <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 gap-1.5"
-                onClick={() => setConfirmAction('cancel')} disabled={isBusy}>
+                onClick={() => setPendingAction({ orderId: selectedOrderId!, action: 'cancel' })} disabled={isBusy}>
                 <XCircle size={14} /> إلغاء الطلب
               </Button>
             )}
