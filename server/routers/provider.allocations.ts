@@ -93,23 +93,32 @@ export const providerAllocationsRouter = router({
         .leftJoin(products, eq(products.id, allocationOrderItems.productId))
         .where(eq(allocationOrderItems.orderId, order.id));
 
-      const allProducts = await db
-        .select({
-          id: products.id,
-          name: products.name,
-          displayName: products.displayName,
-          faceValue: products.faceValue,
-          currency: products.currency,
-          status: products.status,
-          availableStock: sql<number>`(
-            SELECT COUNT(*) FROM cards c
-            WHERE c.provider_id = ${providerId}
-              AND c.product_id = ${products.id}
-              AND c.status = 'AVAILABLE'
-          )`,
-        })
-        .from(products)
-        .where(and(eq(products.providerId, providerId), eq(products.status, "active")));
+      const pool = await getRawDb();
+      const conn = await pool.getConnection();
+      let allProducts: any[] = [];
+      try {
+        const [rows]: any = await conn.execute(
+          `SELECT p.id, p.name, p.display_name AS displayName, p.face_value AS faceValue,
+                  p.currency, p.status,
+                  (SELECT COUNT(*) FROM cards c
+                   WHERE c.provider_id = ? AND c.product_id = p.id AND c.status = 'AVAILABLE') AS availableStock
+           FROM products p
+           WHERE p.provider_id = ? AND p.status = 'active'
+           ORDER BY p.created_at DESC`,
+          [providerId, providerId]
+        );
+        allProducts = rows.map((r: any) => ({
+          id: r.id,
+          name: r.name,
+          displayName: r.displayName,
+          faceValue: r.faceValue,
+          currency: r.currency,
+          status: r.status,
+          availableStock: Number(r.availableStock),
+        }));
+      } finally {
+        conn.release();
+      }
 
       return { ...order, items, allProducts };
     }),
