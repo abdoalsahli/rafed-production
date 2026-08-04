@@ -443,7 +443,7 @@ export const AllocationsPage: React.FC = () => {
                 <Trash2 size={14} /> حذف المسودة
               </Button>
             )}
-            {(isDraft || isConfirmed) && (
+            {isConfirmed && (
               <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 gap-1.5"
                 onClick={() => setConfirmAction('cancel')} disabled={isBusy}>
                 <XCircle size={14} /> إلغاء الطلب
