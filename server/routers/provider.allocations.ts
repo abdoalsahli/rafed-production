@@ -256,9 +256,9 @@ export const providerAllocationsRouter = router({
           const [rows]: any = await conn.execute(
             `SELECT id FROM cards
              WHERE provider_id = ? AND product_id = ? AND status = 'AVAILABLE'
-             LIMIT ?
+             LIMIT ${parseInt(String(item.quantityRequested), 10)}
              FOR UPDATE`,
-            [providerId, item.productId, item.quantityRequested]
+            [providerId, item.productId]
           );
 
           if (rows.length < item.quantityRequested) {
