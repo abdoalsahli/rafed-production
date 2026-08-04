@@ -1,31 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { trpc } from '@/lib/trpc';
-import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
   Plus, FileDown, CheckCircle2, Truck, XCircle,
-  Loader2, ChevronLeft, AlertCircle, ClipboardList,
+  Loader2, ChevronRight, AlertCircle, ClipboardList,
+  User, Phone, StickyNote, Package,
 } from 'lucide-react';
 
 /* ── Status config ─────────────────────────────────────────────────────────── */
 type OrderStatus = 'draft' | 'confirmed' | 'delivered' | 'cancelled';
 
 const STATUS_CONFIG: Record<OrderStatus, { label: string; pill: string }> = {
-  draft:     { label: 'مسودة',      pill: 'bg-slate-100 text-slate-600 border-slate-200' },
-  confirmed: { label: 'مؤكد',       pill: 'bg-blue-100 text-blue-700 border-blue-200' },
-  delivered: { label: 'تم التسليم', pill: 'bg-green-100 text-green-700 border-green-200' },
-  cancelled: { label: 'ملغى',       pill: 'bg-red-100 text-red-600 border-red-200' },
+  draft:     { label: 'مسودة',       pill: 'bg-slate-100 text-slate-600' },
+  confirmed: { label: 'مؤكد',        pill: 'bg-blue-100 text-blue-700' },
+  delivered: { label: 'تم التسليم',  pill: 'bg-green-100 text-green-700' },
+  cancelled: { label: 'ملغى',        pill: 'bg-red-100 text-red-600' },
 };
 
-/* ── helpers ───────────────────────────────────────────────────────────────── */
 function b64ToBlob(b64: string, mime: string) {
   const bytes = atob(b64);
   const arr = new Uint8Array(bytes.length);
   for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
   return new Blob([arr], { type: mime });
 }
-
 function triggerDownload(blob: Blob, filename: string) {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -33,20 +31,16 @@ function triggerDownload(blob: Blob, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-/* ══════════════════════════════════════════════════════════════════════════════
-   AllocationsPage
-   ══════════════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════════════ */
 export const AllocationsPage: React.FC = () => {
   const [view, setView] = useState<'list' | 'create' | 'detail'>('list');
   const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  /* ── New order form ── */
   const [newClient, setNewClient] = useState('');
   const [newPhone, setNewPhone]   = useState('');
   const [newNotes, setNewNotes]   = useState('');
 
-  /* ── Quantity map: productId → qty string ('' = not selected) ── */
   const [qtyMap, setQtyMap] = useState<Record<number, string>>({});
   const [saving, setSaving] = useState(false);
 
@@ -73,7 +67,6 @@ export const AllocationsPage: React.FC = () => {
     if (selectedOrderId) utils.providerAllocations.getOrder.invalidate({ orderId: selectedOrderId });
   };
 
-  /* Sync qtyMap with order items whenever order loads/changes */
   useEffect(() => {
     if (!order?.items) return;
     const initial: Record<number, string> = {};
@@ -83,7 +76,6 @@ export const AllocationsPage: React.FC = () => {
     setQtyMap(initial);
   }, [order]);
 
-  /* ── handlers ── */
   const handleCreateOrder = async () => {
     if (!newClient.trim()) return;
     setError(null);
@@ -104,22 +96,17 @@ export const AllocationsPage: React.FC = () => {
     setError(null);
     setSaving(true);
     try {
-      const allProducts: any[] = productsData?.products ?? [];
-      // Remove items whose qty was cleared
+      const allProducts: any[] = (order as any).allProducts ?? [];
       for (const item of order.items as any[]) {
         const q = parseInt(qtyMap[item.productId] ?? '0', 10);
-        if (!q || q <= 0) {
-          await removeItem.mutateAsync({ itemId: item.id });
-        }
+        if (!q || q <= 0) await removeItem.mutateAsync({ itemId: item.id });
       }
-      // Upsert every product that has qty > 0
       for (const [pidStr, qtyStr] of Object.entries(qtyMap)) {
         const pid = Number(pidStr);
         const qty = parseInt(qtyStr, 10);
         if (!qty || qty <= 0) continue;
-        // Only upsert active products that belong to this provider
         const product = allProducts.find((p: any) => p.id === pid);
-        if (!product || product.status !== 'active') continue;
+        if (!product) continue;
         await upsertItem.mutateAsync({ orderId: selectedOrderId, productId: pid, quantity: qty });
       }
       refetchAll();
@@ -130,49 +117,26 @@ export const AllocationsPage: React.FC = () => {
     }
   };
 
-  const handleConfirm = async () => {
-    if (!selectedOrderId) return;
-    setError(null);
-    try {
-      await confirmOrder.mutateAsync({ orderId: selectedOrderId });
-      refetchAll();
-    } catch (e: any) { setError(e.message); }
-  };
-
-  const handleDeliver = async () => {
-    if (!selectedOrderId) return;
-    setError(null);
-    try {
-      await markDelivered.mutateAsync({ orderId: selectedOrderId });
-      refetchAll();
-    } catch (e: any) { setError(e.message); }
-  };
-
-  const handleCancel = async () => {
-    if (!selectedOrderId) return;
-    setError(null);
-    try {
-      await cancelOrder.mutateAsync({ orderId: selectedOrderId });
-      refetchAll();
-    } catch (e: any) { setError(e.message); }
-  };
-
-  const handleExport = async () => {
-    if (!selectedOrderId) return;
-    setError(null);
+  const handleConfirm  = async () => { if (!selectedOrderId) return; setError(null); try { await confirmOrder.mutateAsync({ orderId: selectedOrderId }); refetchAll(); } catch (e: any) { setError(e.message); } };
+  const handleDeliver  = async () => { if (!selectedOrderId) return; setError(null); try { await markDelivered.mutateAsync({ orderId: selectedOrderId }); refetchAll(); } catch (e: any) { setError(e.message); } };
+  const handleCancel   = async () => { if (!selectedOrderId) return; setError(null); try { await cancelOrder.mutateAsync({ orderId: selectedOrderId }); refetchAll(); } catch (e: any) { setError(e.message); } };
+  const handleExport   = async () => {
+    if (!selectedOrderId) return; setError(null);
     try {
       const { base64, filename } = await exportExcel.mutateAsync({ orderId: selectedOrderId });
-      const blob = b64ToBlob(base64, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-      triggerDownload(blob, filename);
+      triggerDownload(b64ToBlob(base64, 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'), filename);
     } catch (e: any) { setError(e.message); }
   };
 
   /* ══ LIST VIEW ══════════════════════════════════════════════════════════════ */
   if (view === 'list') return (
-    <div className="p-6 md:p-8 space-y-6">
-      <PageHeader title="الطلبات والتخصيصات v2" subtitle="أنشئ طلب تخصيص كروت وسلّمه لعميلك مع ملف Excel" />
-
-      <div className="flex justify-end">
+    <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-6">
+      {/* Header row */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">الطلبات</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">إدارة تخصيص الكروت للعملاء</p>
+        </div>
         <Button onClick={() => { setView('create'); setError(null); }}>
           <Plus size={15} className="ml-1.5" /> طلب جديد
         </Button>
@@ -183,35 +147,44 @@ export const AllocationsPage: React.FC = () => {
           <Loader2 size={18} className="animate-spin" /> جاري التحميل…
         </div>
       ) : !orders?.length ? (
-        <div className="text-center text-muted-foreground py-20">
-          <ClipboardList size={40} className="mx-auto mb-3 opacity-30" />
-          <p>لا توجد طلبات بعد.</p>
+        <div className="text-center text-muted-foreground py-24 flex flex-col items-center gap-3">
+          <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center">
+            <ClipboardList size={24} className="opacity-40" />
+          </div>
+          <p className="font-medium">لا توجد طلبات بعد</p>
+          <p className="text-xs">أنشئ أول طلب تخصيص لعميلك</p>
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {orders.map((o) => {
             const cfg = STATUS_CONFIG[o.status as OrderStatus] ?? STATUS_CONFIG.draft;
             return (
               <button
                 key={o.id}
                 onClick={() => { setSelectedOrderId(o.id); setView('detail'); setError(null); }}
-                className="rounded-2xl border bg-white p-5 text-right shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3"
+                className="rounded-2xl border bg-white p-5 text-right shadow-sm hover:shadow-md hover:border-primary/30 transition-all flex flex-col gap-4 group"
               >
                 <div className="flex items-start justify-between gap-2">
-                  <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold ${cfg.pill}`}>
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cfg.pill}`}>
                     {cfg.label}
-                  </div>
-                  <p className="font-bold text-sm leading-snug">{o.clientName}</p>
+                  </span>
+                  <p className="font-bold text-base leading-snug group-hover:text-primary transition-colors">
+                    {o.clientName}
+                  </p>
                 </div>
-                <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
-                  <div className="rounded-lg bg-slate-50 border px-3 py-2">
-                    <p>المنتجات</p><p className="font-bold text-foreground text-sm">{o.lineCount}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="rounded-xl bg-slate-50 px-3 py-2.5 text-right">
+                    <p className="text-[11px] text-muted-foreground mb-0.5">المنتجات</p>
+                    <p className="font-bold text-lg leading-none">{o.lineCount}</p>
                   </div>
-                  <div className="rounded-lg bg-slate-50 border px-3 py-2">
-                    <p>إجمالي الكروت</p><p className="font-bold text-foreground text-sm">{o.totalRequested}</p>
+                  <div className="rounded-xl bg-slate-50 px-3 py-2.5 text-right">
+                    <p className="text-[11px] text-muted-foreground mb-0.5">إجمالي الكروت</p>
+                    <p className="font-bold text-lg leading-none">{o.totalRequested}</p>
                   </div>
                 </div>
-                <p className="text-xs text-muted-foreground">{new Date(o.createdAt).toLocaleDateString('ar-LY')}</p>
+                <p className="text-xs text-muted-foreground">
+                  {new Date(o.createdAt).toLocaleDateString('ar-LY', { year: 'numeric', month: 'long', day: 'numeric' })}
+                </p>
               </button>
             );
           })}
@@ -222,12 +195,15 @@ export const AllocationsPage: React.FC = () => {
 
   /* ══ CREATE VIEW ════════════════════════════════════════════════════════════ */
   if (view === 'create') return (
-    <div className="p-6 md:p-8 space-y-6 max-w-lg">
+    <div className="p-6 md:p-8 max-w-lg mx-auto space-y-6">
       <div className="flex items-center gap-3">
-        <button onClick={() => setView('list')} className="text-muted-foreground hover:text-foreground transition-colors">
-          <ChevronLeft size={20} />
+        <button onClick={() => setView('list')} className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-lg hover:bg-slate-100">
+          <ChevronRight size={20} />
         </button>
-        <PageHeader title="طلب جديد" subtitle="أدخل بيانات العميل" />
+        <div>
+          <h1 className="text-xl font-bold">طلب جديد</h1>
+          <p className="text-sm text-muted-foreground">أدخل بيانات العميل</p>
+        </div>
       </div>
 
       {error && (
@@ -237,20 +213,27 @@ export const AllocationsPage: React.FC = () => {
       )}
 
       <div className="rounded-2xl border bg-white p-6 space-y-4 shadow-sm">
-        <div className="space-y-1">
-          <label className="text-sm font-semibold">اسم العميل *</label>
-          <Input value={newClient} onChange={(e) => setNewClient(e.target.value)} placeholder="اسم الشركة أو الشخص" />
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium flex items-center gap-1.5 text-foreground">
+            <User size={13} className="text-muted-foreground" /> اسم العميل <span className="text-red-500">*</span>
+          </label>
+          <Input value={newClient} onChange={(e) => setNewClient(e.target.value)} placeholder="اسم الشركة أو الشخص"
+            onKeyDown={(e) => e.key === 'Enter' && handleCreateOrder()} />
         </div>
-        <div className="space-y-1">
-          <label className="text-sm font-semibold">رقم الهاتف</label>
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium flex items-center gap-1.5 text-foreground">
+            <Phone size={13} className="text-muted-foreground" /> رقم الهاتف
+          </label>
           <Input value={newPhone} onChange={(e) => setNewPhone(e.target.value)} placeholder="+218…" dir="ltr" />
         </div>
-        <div className="space-y-1">
-          <label className="text-sm font-semibold">ملاحظات</label>
+        <div className="space-y-1.5">
+          <label className="text-sm font-medium flex items-center gap-1.5 text-foreground">
+            <StickyNote size={13} className="text-muted-foreground" /> ملاحظات
+          </label>
           <Input value={newNotes} onChange={(e) => setNewNotes(e.target.value)} placeholder="أي معلومات إضافية…" />
         </div>
-        <Button className="w-full" onClick={handleCreateOrder} disabled={!newClient.trim() || createOrder.isPending}>
-          {createOrder.isPending ? <><Loader2 size={14} className="animate-spin ml-1.5" />جاري الإنشاء…</> : 'التالي: تحديد الكميات'}
+        <Button className="w-full mt-2" onClick={handleCreateOrder} disabled={!newClient.trim() || createOrder.isPending}>
+          {createOrder.isPending ? <><Loader2 size={14} className="animate-spin ml-1.5" />جاري الإنشاء…</> : 'التالي: تحديد الكميات ←'}
         </Button>
       </div>
     </div>
@@ -267,176 +250,206 @@ export const AllocationsPage: React.FC = () => {
   const cfg = STATUS_CONFIG[order.status as OrderStatus] ?? STATUS_CONFIG.draft;
   const isDraft     = order.status === 'draft';
   const isConfirmed = order.status === 'confirmed';
+  const isDelivered = order.status === 'delivered';
   const isBusy = confirmOrder.isPending || markDelivered.isPending || cancelOrder.isPending ||
                  exportExcel.isPending || saving;
 
   const activeProducts: any[] = (order as any).allProducts ?? [];
+  const orderItems: any[]     = (order.items as any[]) ?? [];
 
-  /* Total cards across all qty inputs */
-  const totalCards = Object.values(qtyMap).reduce((sum, v) => sum + (parseInt(v, 10) || 0), 0);
-
-  /* Check if qtyMap differs from saved order items */
   const savedQty: Record<number, number> = {};
-  for (const item of order.items as any[]) savedQty[item.productId] = item.quantityRequested;
+  for (const item of orderItems) savedQty[item.productId] = item.quantityRequested;
+
   const hasUnsaved = isDraft && activeProducts.some((p: any) => {
     const current = parseInt(qtyMap[p.id] ?? '0', 10) || 0;
-    const saved = savedQty[p.id] ?? 0;
-    return current !== saved;
+    return current !== (savedQty[p.id] ?? 0);
   });
 
+  const totalCards = Object.values(qtyMap).reduce((s, v) => s + (parseInt(v, 10) || 0), 0);
+
+  /* For non-draft: only show products that have items */
+  const displayProducts = isDraft
+    ? activeProducts
+    : activeProducts.filter((p: any) => savedQty[p.id] > 0);
+
   return (
-    <div className="p-6 md:p-8 space-y-6">
-      {/* Header */}
+    <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-5">
+
+      {/* ── Header ── */}
       <div className="flex items-start gap-3">
         <button
           onClick={() => { setView('list'); setSelectedOrderId(null); }}
-          className="text-muted-foreground hover:text-foreground transition-colors mt-1"
+          className="text-muted-foreground hover:text-foreground transition-colors p-1 rounded-lg hover:bg-slate-100 mt-0.5 shrink-0"
         >
-          <ChevronLeft size={20} />
+          <ChevronRight size={20} />
         </button>
-        <div className="flex-1">
-          <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-xl font-bold">{order.clientName}</h1>
-            <span className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-semibold ${cfg.pill}`}>
-              {cfg.label}
-            </span>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <h1 className="text-xl font-bold truncate">{order.clientName}</h1>
+            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full shrink-0 ${cfg.pill}`}>{cfg.label}</span>
           </div>
-          {order.clientPhone && <p className="text-sm text-muted-foreground mt-0.5">{order.clientPhone}</p>}
-          {order.clientNotes && <p className="text-sm text-muted-foreground">{order.clientNotes}</p>}
+          <div className="flex flex-wrap gap-x-4 gap-y-0.5 mt-1">
+            {(order as any).clientPhone && (
+              <span className="text-sm text-muted-foreground flex items-center gap-1">
+                <Phone size={11} />{(order as any).clientPhone}
+              </span>
+            )}
+            {(order as any).clientNotes && (
+              <span className="text-sm text-muted-foreground flex items-center gap-1">
+                <StickyNote size={11} />{(order as any).clientNotes}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
+      {/* ── Error ── */}
       {error && (
         <div className="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          <AlertCircle size={15} className="shrink-0" />{error}
-          <button className="mr-auto" onClick={() => setError(null)}><XCircle size={14} /></button>
+          <AlertCircle size={15} className="shrink-0" />
+          <span className="flex-1">{error}</span>
+          <button onClick={() => setError(null)}><XCircle size={14} /></button>
         </div>
       )}
 
-      {/* Action bar */}
+      {/* ── Action bar ── */}
       <div className="flex flex-wrap gap-2 items-center">
         {isDraft && hasUnsaved && (
-          <Button onClick={handleSaveQuantities} disabled={isBusy}>
-            {saving ? <Loader2 size={14} className="animate-spin ml-1.5" /> : <CheckCircle2 size={15} className="ml-1.5" />}
+          <Button onClick={handleSaveQuantities} disabled={isBusy} className="gap-1.5">
+            {saving ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={15} />}
             حفظ الكميات
           </Button>
         )}
-        {isDraft && !hasUnsaved && (order.items as any[])?.length > 0 && (
-          <Button onClick={handleConfirm} disabled={isBusy}>
-            {confirmOrder.isPending ? <Loader2 size={14} className="animate-spin ml-1.5" /> : <CheckCircle2 size={15} className="ml-1.5" />}
+        {isDraft && !hasUnsaved && orderItems.length > 0 && (
+          <Button onClick={handleConfirm} disabled={isBusy} className="gap-1.5">
+            {confirmOrder.isPending ? <Loader2 size={14} className="animate-spin" /> : <CheckCircle2 size={15} />}
             تأكيد الطلب
           </Button>
         )}
         {isConfirmed && (
-          <>
-            <Button onClick={handleDeliver} disabled={isBusy}>
-              {markDelivered.isPending ? <Loader2 size={14} className="animate-spin ml-1.5" /> : <Truck size={15} className="ml-1.5" />}
-              تسليم
-            </Button>
-            <Button variant="outline" onClick={handleExport} disabled={isBusy}>
-              {exportExcel.isPending ? <Loader2 size={14} className="animate-spin ml-1.5" /> : <FileDown size={15} className="ml-1.5" />}
-              تصدير Excel
-            </Button>
-          </>
+          <Button onClick={handleDeliver} disabled={isBusy} className="gap-1.5">
+            {markDelivered.isPending ? <Loader2 size={14} className="animate-spin" /> : <Truck size={15} />}
+            تسليم
+          </Button>
         )}
-        {order.status === 'delivered' && (
-          <Button variant="outline" onClick={handleExport} disabled={isBusy}>
-            {exportExcel.isPending ? <Loader2 size={14} className="animate-spin ml-1.5" /> : <FileDown size={15} className="ml-1.5" />}
+        {(isConfirmed || isDelivered) && (
+          <Button variant="outline" onClick={handleExport} disabled={isBusy} className="gap-1.5">
+            {exportExcel.isPending ? <Loader2 size={14} className="animate-spin" /> : <FileDown size={15} />}
             تصدير Excel
           </Button>
         )}
         {(isDraft || isConfirmed) && (
-          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50" onClick={handleCancel} disabled={isBusy}>
+          <Button variant="outline" className="text-red-600 border-red-200 hover:bg-red-50 gap-1.5 mr-auto" onClick={handleCancel} disabled={isBusy}>
             إلغاء الطلب
           </Button>
         )}
         {order.status === 'cancelled' && (
-          <Button onClick={() => setView('create')} variant="outline">
-            <Plus size={15} className="ml-1.5" /> إنشاء طلب جديد
+          <Button onClick={() => setView('create')} variant="outline" className="gap-1.5">
+            <Plus size={15} /> إنشاء طلب جديد
           </Button>
         )}
-        {isDraft && totalCards > 0 && (
+        {isDraft && totalCards > 0 && !hasUnsaved && (
           <span className="text-sm text-muted-foreground mr-auto">
-            إجمالي: <strong>{totalCards}</strong> كرت
+            إجمالي: <strong className="text-foreground">{totalCards}</strong> كرت
+          </span>
+        )}
+        {isDraft && hasUnsaved && totalCards > 0 && (
+          <span className="text-sm text-amber-600 mr-auto font-medium">
+            ● {totalCards} كرت — غير محفوظ
           </span>
         )}
       </div>
 
-      {/* Products table */}
+      {/* ── Products card ── */}
       <div className="rounded-2xl border bg-white shadow-sm overflow-hidden">
-        <div className="px-5 py-4 border-b font-semibold text-sm flex items-center justify-between">
-          <span>المنتجات</span>
-          {isDraft && hasUnsaved && (
-            <span className="text-xs text-amber-600 font-normal">• تغييرات غير محفوظة</span>
+        <div className="px-5 py-3.5 border-b flex items-center justify-between bg-slate-50/60">
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <Package size={15} className="text-muted-foreground" />
+            المنتجات
+          </div>
+          {isDraft && (
+            <span className="text-xs text-muted-foreground">
+              أدخل الكمية المطلوبة لكل منتج
+            </span>
           )}
         </div>
 
-        {activeProducts.length === 0 ? (
-          <p className="text-center text-muted-foreground py-10 text-sm">
-            لا توجد منتجات نشطة.
-          </p>
+        {displayProducts.length === 0 ? (
+          <div className="py-14 text-center text-muted-foreground flex flex-col items-center gap-2">
+            <Package size={28} className="opacity-20" />
+            <p className="text-sm">{isDraft ? 'لا توجد منتجات نشطة' : 'لا توجد منتجات في هذا الطلب'}</p>
+          </div>
         ) : (
           <table className="w-full text-sm">
-            <thead className="bg-slate-50 text-muted-foreground text-xs">
-              <tr>
+            <thead>
+              <tr className="text-xs text-muted-foreground border-b">
                 <th className="text-right px-5 py-2.5 font-medium">المنتج</th>
-                {(isConfirmed || order.status === 'delivered') && (
+                {(isConfirmed || isDelivered) && (
                   <th className="text-center px-4 py-2.5 font-medium">المتاح</th>
                 )}
-                <th className="text-center px-4 py-2.5 font-medium w-32">
-                  {isDraft ? 'الكمية المطلوبة' : 'المطلوب'}
+                <th className="text-center px-4 py-2.5 font-medium w-36">
+                  {isDraft ? 'الكمية' : 'المطلوب'}
                 </th>
-                {(isConfirmed || order.status === 'delivered') && (
+                {(isConfirmed || isDelivered) && (
                   <th className="text-center px-4 py-2.5 font-medium">المنجز</th>
                 )}
               </tr>
             </thead>
-            <tbody className="divide-y divide-border">
-              {activeProducts.map((product: any) => {
-                const savedItem = (order.items as any[])?.find((i: any) => i.productId === product.id);
+            <tbody>
+              {displayProducts.map((product: any, idx: number) => {
+                const savedItem = orderItems.find((i: any) => i.productId === product.id);
                 const qty = qtyMap[product.id] ?? '';
                 const hasQty = parseInt(qty, 10) > 0;
+                const isLast = idx === displayProducts.length - 1;
 
                 return (
                   <tr
                     key={product.id}
-                    className={hasQty ? 'bg-blue-50/40' : ''}
+                    className={[
+                      !isLast ? 'border-b border-border/60' : '',
+                      isDraft && hasQty ? 'bg-primary/5' : '',
+                      isDraft && !hasQty ? 'opacity-60' : '',
+                    ].join(' ')}
                   >
-                    <td className="px-5 py-3">
-                      <p className="font-medium">{product.displayName || product.name}</p>
-                      {savedItem && !isDraft && (
-                        <p className="text-xs text-muted-foreground">{product.displayName || product.name}</p>
+                    <td className="px-5 py-3.5">
+                      <p className="font-medium leading-snug">{product.displayName || product.name}</p>
+                      {product.faceValue && (
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {product.faceValue} {product.currency || 'LYD'}
+                        </p>
                       )}
                     </td>
-                    {(isConfirmed || order.status === 'delivered') && (
-                      <td className={`px-4 py-3 text-center font-semibold text-xs ${
+
+                    {(isConfirmed || isDelivered) && (
+                      <td className={`px-4 py-3.5 text-center text-xs font-semibold ${
                         savedItem && savedItem.availableStock < savedItem.quantityRequested
                           ? 'text-red-600' : 'text-green-600'
                       }`}>
                         {savedItem?.availableStock ?? '—'}
                       </td>
                     )}
+
                     <td className="px-4 py-3 text-center">
                       {isDraft ? (
                         <Input
                           type="number"
                           min={0}
                           value={qty}
-                          onChange={(e) => {
-                            const v = e.target.value;
-                            setQtyMap((prev) => ({ ...prev, [product.id]: v }));
-                          }}
-                          className="w-24 mx-auto text-center h-8 text-sm"
+                          onChange={(e) => setQtyMap((prev) => ({ ...prev, [product.id]: e.target.value }))}
+                          className="w-24 mx-auto text-center h-9 text-sm font-medium"
                           placeholder="0"
                         />
                       ) : (
-                        <span className={savedItem ? 'font-semibold' : 'text-muted-foreground'}>
+                        <span className={`font-semibold ${savedItem ? '' : 'text-muted-foreground'}`}>
                           {savedItem?.quantityRequested ?? '—'}
                         </span>
                       )}
                     </td>
-                    {(isConfirmed || order.status === 'delivered') && (
-                      <td className="px-4 py-3 text-center">{savedItem?.quantityFulfilled ?? '—'}</td>
+
+                    {(isConfirmed || isDelivered) && (
+                      <td className="px-4 py-3.5 text-center font-semibold">
+                        {savedItem?.quantityFulfilled ?? '—'}
+                      </td>
                     )}
                   </tr>
                 );
