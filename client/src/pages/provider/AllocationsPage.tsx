@@ -170,7 +170,7 @@ export const AllocationsPage: React.FC = () => {
   /* ══ LIST VIEW ══════════════════════════════════════════════════════════════ */
   if (view === 'list') return (
     <div className="p-6 md:p-8 space-y-6">
-      <PageHeader title="الطلبات والتخصيصات" subtitle="أنشئ طلب تخصيص كروت وسلّمه لعميلك مع ملف Excel" />
+      <PageHeader title="الطلبات والتخصيصات v2" subtitle="أنشئ طلب تخصيص كروت وسلّمه لعميلك مع ملف Excel" />
 
       <div className="flex justify-end">
         <Button onClick={() => { setView('create'); setError(null); }}>
