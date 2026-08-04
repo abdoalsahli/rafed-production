@@ -93,7 +93,19 @@ export const providerAllocationsRouter = router({
         .leftJoin(products, eq(products.id, allocationOrderItems.productId))
         .where(eq(allocationOrderItems.orderId, order.id));
 
-      return { ...order, items };
+      const allProducts = await db
+        .select({
+          id: products.id,
+          name: products.name,
+          displayName: products.displayName,
+          faceValue: products.faceValue,
+          currency: products.currency,
+          status: products.status,
+        })
+        .from(products)
+        .where(and(eq(products.providerId, providerId), eq(products.status, "active")));
+
+      return { ...order, items, allProducts };
     }),
 
   /** Create a new draft order */

@@ -59,9 +59,6 @@ export const AllocationsPage: React.FC = () => {
     { orderId: selectedOrderId! },
     { enabled: view === 'detail' && !!selectedOrderId }
   );
-  const { data: productsData } = trpc.provider.listProducts.useQuery(
-    {}, { staleTime: 60_000, enabled: view === 'detail' }
-  );
 
   const createOrder   = trpc.providerAllocations.createOrder.useMutation();
   const upsertItem    = trpc.providerAllocations.upsertItem.useMutation();
@@ -273,8 +270,7 @@ export const AllocationsPage: React.FC = () => {
   const isBusy = confirmOrder.isPending || markDelivered.isPending || cancelOrder.isPending ||
                  exportExcel.isPending || saving;
 
-  const allProducts: any[] = productsData?.products ?? [];
-  const activeProducts = allProducts.filter((p: any) => p.status === 'active');
+  const activeProducts: any[] = (order as any).allProducts ?? [];
 
   /* Total cards across all qty inputs */
   const totalCards = Object.values(qtyMap).reduce((sum, v) => sum + (parseInt(v, 10) || 0), 0);
@@ -377,7 +373,7 @@ export const AllocationsPage: React.FC = () => {
 
         {activeProducts.length === 0 ? (
           <p className="text-center text-muted-foreground py-10 text-sm">
-            {productsData ? 'لا توجد منتجات نشطة.' : 'جاري التحميل…'}
+            لا توجد منتجات نشطة.
           </p>
         ) : (
           <table className="w-full text-sm">
