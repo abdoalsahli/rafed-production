@@ -84,7 +84,7 @@ export default function LoginPage() {
           {/* Demo account cards */}
           {isDemoEnabled && (
             <div className="mb-6">
-              <p className="text-xs text-[#8a96a3] mb-3 text-center tracking-wide">اختر حساباً للدخول</p>
+              <p className="text-xs text-[#8a96a3] mb-3 text-center tracking-wide">ادخل جرب المنصة</p>
               <div className="flex flex-col gap-2.5">
 
                 <button

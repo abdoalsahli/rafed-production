@@ -128,7 +128,7 @@ export default function LandingPage() {
 
           <div className="rfd-hero-btns" style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 14 }}>
             <a href="#cta" className="rfd-btn-primary" style={{ fontSize: 17, padding: '17px 32px', boxShadow: '0 14px 32px rgba(0,35,111,0.24)' }}>اطلب عرضاً تقديمياً</a>
-            <a href="#features" className="rfd-btn-outline" style={{ fontSize: 17, padding: '17px 32px' }}>شاهد المنصة</a>
+            <a href="/login" className="rfd-btn-outline" style={{ fontSize: 17, padding: '17px 32px' }}>شاهد المنصة</a>
           </div>
           <p style={{ fontSize: 14, color: MU2, fontWeight: 500, margin: '0 0 56px' }}></p>
         </div>
