@@ -19,7 +19,7 @@ export default function LoginPage() {
   const { data: demoStatus } = trpc.demo.isDemoLoginEnabled.useQuery(undefined, {
     retry: false,
   });
-  const isDemoEnabled = demoStatus?.enabled === true && demoStatus?.environment !== 'production';
+  const isDemoEnabled = demoStatus?.enabled === true;
 
   const demoLoginMutation = trpc.demo.loginWithDemo.useMutation({
     onSuccess: async () => {
