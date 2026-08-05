@@ -216,7 +216,7 @@ export default function LoginPage() {
               <div className="flex flex-col gap-2">
                 <button
                   type="button"
-                  onClick={() => demoLoginMutation.mutate({ email: 'demo-provider@example.com' })}
+                  onClick={() => demoLoginMutation.mutate({ email: 'admin@mostanad.ly' })}
                   disabled={demoLoginMutation.isPending || loginMutation.isPending || isOAuth}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-[#c8d6e8] rounded-lg text-sm font-medium text-[#444651] bg-[#f8f9ff] hover:bg-[#f0f4ff] hover:border-[#00236f] hover:text-[#00236f] transition-colors disabled:opacity-50"
                 >
@@ -225,7 +225,7 @@ export default function LoginPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => demoLoginMutation.mutate({ email: 'demo-distributor@example.com' })}
+                  onClick={() => demoLoginMutation.mutate({ email: 'admin@distributer1.ly' })}
                   disabled={demoLoginMutation.isPending || loginMutation.isPending || isOAuth}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-[#c8d6e8] rounded-lg text-sm font-medium text-[#444651] bg-[#f8f9ff] hover:bg-[#f0f4ff] hover:border-[#00236f] hover:text-[#00236f] transition-colors disabled:opacity-50"
                 >

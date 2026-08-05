@@ -11,14 +11,14 @@ import { COOKIE_NAME, ONE_YEAR_MS } from "@shared/const";
 
 const DEMO_ACCOUNTS = [
   {
-    email: "demo-provider@example.com",
+    email: "admin@mostanad.ly",
     name: "Demo Provider User",
     role: "user" as const,
     organizationType: "provider" as const,
     description: "Provider account with access to provider dashboard and API management",
   },
   {
-    email: "demo-distributor@example.com",
+    email: "admin@distributer1.ly",
     name: "Demo Distributor User",
     role: "user" as const,
     organizationType: "distributor" as const,
