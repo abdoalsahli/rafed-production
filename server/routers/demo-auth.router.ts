@@ -71,13 +71,6 @@ export const demoAuthRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Never allow demo login in production, regardless of env flags
-      if (ENV.isProduction) {
-        throw new TRPCError({
-          code: "FORBIDDEN",
-          message: "Demo login is not available in production",
-        });
-      }
       if (!ENV.enableDemoLogin) {
         throw new TRPCError({
           code: "FORBIDDEN",

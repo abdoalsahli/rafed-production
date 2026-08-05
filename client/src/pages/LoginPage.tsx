@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Mail, Lock, Loader2 } from 'lucide-react';
+import { Mail, Lock, Loader2, FlaskConical } from 'lucide-react';
 import { getLoginUrl } from '@/const';
 import { useAuth } from '@/_core/hooks/useAuth';
 import { useLocation } from 'wouter';
@@ -15,6 +15,21 @@ export default function LoginPage() {
   const { user, isAuthenticated, refresh } = useAuth();
   const [, setLocation] = useLocation();
   const utils = trpc.useUtils();
+
+  const { data: demoStatus } = trpc.demo.isDemoLoginEnabled.useQuery(undefined, {
+    retry: false,
+  });
+  const isDemoEnabled = demoStatus?.enabled === true && demoStatus?.environment !== 'production';
+
+  const demoLoginMutation = trpc.demo.loginWithDemo.useMutation({
+    onSuccess: async () => {
+      await utils.auth.me.invalidate();
+      refresh();
+    },
+    onError: (err: any) => {
+      setError(err.message || 'فشل تسجيل الدخول التجريبي');
+    },
+  });
 
   const loginMutation = trpc.auth.login.useMutation({
     onSuccess: async () => {
@@ -183,6 +198,44 @@ export default function LoginPage() {
               )}
             </button>
           </form>
+
+          {/* Demo login */}
+          {isDemoEnabled && (
+            <>
+              <div className="relative mt-6 mb-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-[#e2e8f0]" />
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="px-3 bg-white text-[#444651] flex items-center gap-1.5">
+                    <FlaskConical size={12} className="text-[#8a96a3]" />
+                    الدخول بحساب تجريبي
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={() => demoLoginMutation.mutate({ email: 'demo-provider@example.com' })}
+                  disabled={demoLoginMutation.isPending || loginMutation.isPending || isOAuth}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-[#c8d6e8] rounded-lg text-sm font-medium text-[#444651] bg-[#f8f9ff] hover:bg-[#f0f4ff] hover:border-[#00236f] hover:text-[#00236f] transition-colors disabled:opacity-50"
+                >
+                  {demoLoginMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : null}
+                  دخول كمزوّد (Provider)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => demoLoginMutation.mutate({ email: 'demo-distributor@example.com' })}
+                  disabled={demoLoginMutation.isPending || loginMutation.isPending || isOAuth}
+                  className="w-full flex items-center justify-center gap-2 px-4 py-2.5 border border-dashed border-[#c8d6e8] rounded-lg text-sm font-medium text-[#444651] bg-[#f8f9ff] hover:bg-[#f0f4ff] hover:border-[#00236f] hover:text-[#00236f] transition-colors disabled:opacity-50"
+                >
+                  {demoLoginMutation.isPending ? <Loader2 size={14} className="animate-spin" /> : null}
+                  دخول كموزّع (Distributor)
+                </button>
+              </div>
+              <p className="text-center text-xs text-[#8a96a3] mt-2">للتجربة والعرض فقط — غير متاح في الإنتاج</p>
+            </>
+          )}
 
           {/* Sign up link */}
           <p className="mt-6 text-center text-xs text-[#444651]">

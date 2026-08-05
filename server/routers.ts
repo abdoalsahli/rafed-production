@@ -29,6 +29,7 @@ import { debugRouter } from "./routers/debug.router";
 import { webhookResilienceRouter } from "./routers/webhook.resilience.router";
 import { userRouter } from "./routers/user.router";
 import { providerAllocationsRouter } from "./routers/provider.allocations";
+import { demoAuthRouter } from "./routers/demo-auth.router";
 
 
 
@@ -124,6 +125,7 @@ export const appRouter = router({
   webhookResilience: webhookResilienceRouter,
   user: userRouter,
   providerAllocations: providerAllocationsRouter,
+  demo: demoAuthRouter,
 
   // TODO: add feature routers here, e.g.
   // todo: router({
