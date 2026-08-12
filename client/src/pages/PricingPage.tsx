@@ -168,7 +168,7 @@ export default function PricingPage() {
 
           {/* Desktop CTA */}
           <div className="rfd-nav-cta-wrap">
-            <a href="/login" className="rfd-btn-nav">اطلب عرضاً تقديمياً</a>
+            <a href="/login" className="rfd-btn-nav">شاهد المنصة</a>
           </div>
 
           {/* Hamburger */}
@@ -199,7 +199,7 @@ export default function PricingPage() {
               padding: '12px 20px', borderRadius: 11,
             }}
           >
-            اطلب عرضاً تقديمياً
+            شاهد المنصة
           </a>
         </div>
       </nav>
@@ -449,7 +449,7 @@ export default function PricingPage() {
             </p>
             <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
               <a href={WA.cta} target="_blank" rel="noopener noreferrer" className="rfd-cta-navy">تواصل مع المبيعات</a>
-              <a href="/" className="rfd-cta-outline">شاهد المنصة</a>
+              <a href="/login" className="rfd-cta-outline">شاهد المنصة</a>
             </div>
           </div>
         </div>

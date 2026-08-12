@@ -128,8 +128,7 @@ export default function LandingPage() {
           </p>
 
           <div className="rfd-hero-btns" style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 14 }}>
-            <a href="#cta" className="rfd-btn-primary" style={{ fontSize: 17, padding: '17px 32px', boxShadow: '0 14px 32px rgba(0,35,111,0.24)' }}>اطلب عرضاً تقديمياً</a>
-            <a href="/login" className="rfd-btn-outline" style={{ fontSize: 17, padding: '17px 32px' }}>شاهد المنصة</a>
+            <a href="/login" className="rfd-btn-primary" style={{ fontSize: 17, padding: '17px 32px', boxShadow: '0 14px 32px rgba(0,35,111,0.24)' }}>شاهد المنصة</a>
           </div>
           <p style={{ fontSize: 14, color: MU2, fontWeight: 500, margin: '0 0 56px' }}></p>
         </div>
@@ -403,8 +402,7 @@ export default function LandingPage() {
               شاهد كيف يمنح رافد فريقك سيطرة كاملة على شبكة التوزيع — وحماية تاريخية لا توفّرها أي طريقة تقليدية.
             </p>
             <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <button className="rfd-cta-primary" style={{ fontSize: 18, padding: '18px 36px', boxShadow: '0 16px 38px rgba(0,35,111,0.26)' }}>اطلب عرضاً تقديمياً</button>
-              <button className="rfd-cta-outline" style={{ fontSize: 18, padding: '18px 36px' }}>تحدّث إلى المبيعات</button>
+              <a href="https://wa.me/218944513974?text=%D8%A7%D9%84%D8%B3%D9%84%D8%A7%D9%85%20%D8%B9%D9%84%D9%8A%D9%83%D9%85%D8%8C%0A%D8%A3%D9%88%D8%AF%20%D9%85%D8%B9%D8%B1%D9%81%D8%A9%20%D8%A7%D9%84%D9%85%D8%B2%D9%8A%D8%AF%20%D8%B9%D9%86%20%D9%85%D9%86%D8%B5%D8%A9%20%D8%B1%D8%A7%D9%81%D8%AF%20%D9%88%D8%A3%D8%AD%D8%AA%D8%A7%D8%AC%20%D8%A5%D9%84%D9%89%20%D9%85%D8%B3%D8%A7%D8%B9%D8%AF%D8%A9%20%D9%81%D9%8A%20%D8%A7%D9%84%D8%A8%D8%AF%D8%A1." target="_blank" rel="noopener noreferrer" className="rfd-cta-outline" style={{ fontSize: 18, padding: '18px 36px' }}>تحدّث إلى المبيعات</a>
             </div>
           </div>
         </div>
