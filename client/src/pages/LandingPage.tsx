@@ -100,6 +100,7 @@ export default function LandingPage() {
             <a href="#features" className="rfd-nav-link">المنصة</a>
             <a href="#distributors" className="rfd-nav-link">الموزّعون</a>
             <a href="#dup" className="rfd-nav-link">الحماية من التكرار</a>
+            <a href="/pricing" className="rfd-nav-link">الأسعار</a>
             <a href="#cta" className="rfd-nav-link">تواصل معنا</a>
           </div>
           <a href="/login" className="rfd-nav-cta">سجّل دخولك</a>

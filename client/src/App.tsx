@@ -38,6 +38,7 @@ import UnauthorizedPage from "./pages/UnauthorizedPage";
 import LoginPage from "./pages/LoginPage";
 import DashboardRedirect from "./pages/DashboardRedirect";
 import LandingPage from "./pages/LandingPage";
+import PricingPage from "./pages/PricingPage";
 import OrganizationsPage from "./pages/admin/OrganizationsPage";
 import UsersPage from "./pages/admin/UsersPage";
 import AdminSettingsPage from "./pages/admin/SettingsPage";
@@ -50,7 +51,7 @@ import { useCurrentRoleContext } from "./hooks/useCurrentRoleContext";
 import { trpc } from "./lib/trpc";
 
 // Public pages that should NOT show sidebar
-const PUBLIC_PAGES = ["/", "/login", "/signup", "/pending-activation", "/suspended", "/unauthorized", "/404", "/landing"];
+const PUBLIC_PAGES = ["/", "/login", "/signup", "/pending-activation", "/suspended", "/unauthorized", "/404", "/landing", "/pricing"];
 
 function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const { logout, user } = useAuth();
@@ -139,6 +140,7 @@ function Router() {
     <Switch>
       <Route path={"/"} component={LandingPage} />
       <Route path={"/landing"} component={LandingPage} />
+      <Route path={"/pricing"} component={PricingPage} />
       <Route path={"/dashboard"} component={Protected(DashboardRedirect)} />
       <Route path={"/login"} component={LoginPage} />
       <Route path={"/signup"} component={SignupPage} />
