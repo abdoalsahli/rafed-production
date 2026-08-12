@@ -3,6 +3,7 @@
  * Translated from Rafed Design project (Pricing.dc.html)
  * Accent: #0FB5AC | Navy: #00236F | BG: #F6F8FD
  */
+import { useState } from 'react';
 
 const ACCENT  = '#0FB5AC';
 const NAVY    = '#00236F';
@@ -53,6 +54,8 @@ function FeatureList({ dark = false, featured = false }: { dark?: boolean; featu
 }
 
 export default function PricingPage() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <div
       dir="rtl"
@@ -66,12 +69,18 @@ export default function PricingPage() {
     >
       <style>{`
         @keyframes rfdGlow{0%,100%{opacity:.55;transform:scale(1)}50%{opacity:.9;transform:scale(1.05)}}
+
+        /* ── nav links ── */
         .rfd-nav-link{transition:color .2s;color:${MU};font-size:clamp(14px,1.4vw,16px);font-weight:500;}
         .rfd-nav-link:hover{color:${INK};}
+
+        /* ── card hovers ── */
         .rfd-card-plain{transition:transform .25s,border-color .25s;}
         .rfd-card-plain:hover{transform:translateY(-4px);border-color:rgba(0,35,111,0.20);}
         .rfd-card-dark{transition:transform .25s;}
         .rfd-card-dark:hover{transform:translateY(-4px);}
+
+        /* ── buttons ── */
         .rfd-btn-nav{background:${NAVY};color:#fff;font-weight:800;font-size:clamp(13px,1.3vw,15px);padding:11px clamp(14px,2vw,22px);border-radius:11px;box-shadow:0 8px 22px rgba(0,35,111,0.22);transition:transform .2s;white-space:nowrap;display:inline-block;}
         .rfd-btn-nav:hover{transform:translateY(-2px);}
         .rfd-btn-plain{display:block;text-align:center;background:#fff;color:${INK};font-weight:800;font-size:16px;padding:15px;border-radius:12px;border:1px solid rgba(0,35,111,0.18);margin-bottom:28px;transition:border-color .2s;}
@@ -86,6 +95,35 @@ export default function PricingPage() {
         .rfd-cta-outline:hover{border-color:${ACCENT};}
         .rfd-footer-link{font-size:14.5px;color:${MU};transition:color .2s;}
         .rfd-footer-link:hover{color:${INK};}
+
+        /* ── hamburger button ── */
+        .rfd-burger{display:none;flex-direction:column;justify-content:center;gap:5px;width:40px;height:40px;padding:6px;background:none;border:1px solid ${LN};border-radius:10px;cursor:pointer;}
+        .rfd-burger span{display:block;height:2px;border-radius:2px;background:${INK};transition:transform .25s,opacity .2s,width .2s;}
+
+        /* ── desktop: show links, hide burger ── */
+        .rfd-nav-links{display:flex;align-items:center;gap:clamp(16px,2.6vw,34px);flex-wrap:wrap;justify-content:center;}
+        .rfd-nav-cta-wrap{display:block;}
+
+        /* ── mobile drawer ── */
+        .rfd-mobile-menu{
+          display:none;
+          flex-direction:column;
+          gap:4px;
+          padding:12px clamp(16px,4vw,40px) 16px;
+          border-top:1px solid ${LN};
+          background:rgba(246,248,253,0.97);
+        }
+        .rfd-mobile-menu.open{display:flex;}
+        .rfd-mobile-link{font-size:17px;font-weight:600;color:${MU};padding:10px 0;border-bottom:1px solid ${LN};transition:color .2s;}
+        .rfd-mobile-link:last-child{border-bottom:none;}
+        .rfd-mobile-link:hover{color:${INK};}
+        .rfd-mobile-link.active{color:${INK};font-weight:800;}
+
+        @media(max-width:720px){
+          .rfd-nav-links{display:none;}
+          .rfd-nav-cta-wrap{display:none;}
+          .rfd-burger{display:flex;}
+        }
       `}</style>
 
       {/* ── Nav ── */}
@@ -95,13 +133,15 @@ export default function PricingPage() {
         background: 'rgba(246,248,253,0.82)',
         borderBottom: `1px solid ${LN}`,
       }}>
+        {/* Top bar */}
         <div style={{
           maxWidth: 1200, margin: '0 auto',
           padding: '14px clamp(16px,4vw,40px)',
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          gap: 'clamp(12px,2vw,32px)', flexWrap: 'wrap',
+          gap: 16,
         }}>
-          <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          {/* Logo */}
+          <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
             <span style={{
               width: 30, height: 30, borderRadius: 9,
               background: `linear-gradient(140deg,${NAVY},${ACCENT})`,
@@ -111,16 +151,48 @@ export default function PricingPage() {
             <span style={{ fontSize: 26, fontWeight: 900, letterSpacing: '-0.5px' }}>رافد</span>
           </a>
 
-          <div style={{
-            display: 'flex', alignItems: 'center',
-            gap: 'clamp(16px,2.6vw,34px)', flexWrap: 'wrap', justifyContent: 'center',
-          }}>
+          {/* Desktop links */}
+          <div className="rfd-nav-links">
             <a href="/" className="rfd-nav-link">المنصة</a>
             <a href="/#features" className="rfd-nav-link">القدرات</a>
             <a href="/pricing" style={{ color: INK, fontWeight: 700, fontSize: 'clamp(14px,1.4vw,16px)' }}>الأسعار</a>
           </div>
 
-          <a href="/login" className="rfd-btn-nav">اطلب عرضاً تقديمياً</a>
+          {/* Desktop CTA */}
+          <div className="rfd-nav-cta-wrap">
+            <a href="/login" className="rfd-btn-nav">اطلب عرضاً تقديمياً</a>
+          </div>
+
+          {/* Hamburger */}
+          <button
+            className="rfd-burger"
+            aria-label={menuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
+            onClick={() => setMenuOpen(o => !o)}
+          >
+            <span style={{ transform: menuOpen ? 'translateY(7px) rotate(45deg)' : 'none' }} />
+            <span style={{ opacity: menuOpen ? 0 : 1, width: menuOpen ? 0 : '100%' }} />
+            <span style={{ transform: menuOpen ? 'translateY(-7px) rotate(-45deg)' : 'none' }} />
+          </button>
+        </div>
+
+        {/* Mobile drawer */}
+        <div className={`rfd-mobile-menu${menuOpen ? ' open' : ''}`}>
+          <a href="/" className="rfd-mobile-link" onClick={() => setMenuOpen(false)}>المنصة</a>
+          <a href="/#features" className="rfd-mobile-link" onClick={() => setMenuOpen(false)}>القدرات</a>
+          <a href="/pricing" className="rfd-mobile-link active" onClick={() => setMenuOpen(false)}>الأسعار</a>
+          <a
+            href="/login"
+            onClick={() => setMenuOpen(false)}
+            style={{
+              marginTop: 8,
+              display: 'block', textAlign: 'center',
+              background: NAVY, color: '#fff',
+              fontWeight: 800, fontSize: 15,
+              padding: '12px 20px', borderRadius: 11,
+            }}
+          >
+            اطلب عرضاً تقديمياً
+          </a>
         </div>
       </nav>
 
