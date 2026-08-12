@@ -19,6 +19,7 @@ const FEATURES = [
   'حدود ائتمانية للموزّعين',
   'تقارير مالية وتسويات تلقائية',
   'صلاحيات فريق وأدوار مخصّصة',
+  'تكامل عبر API مع الموزّعين',
 ];
 
 function CheckIcon({ dark = false, featured = false }: { dark?: boolean; featured?: boolean }) {
