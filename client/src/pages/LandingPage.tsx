@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const A   = '#0FB5AC';
 const DK  = '#00236F';
@@ -38,6 +38,8 @@ function ScrollToTopButton() {
 }
 
 export default function LandingPage() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const close = useCallback(() => setMenuOpen(false), []);
 
   return (
     <div dir="rtl" lang="ar" style={{ background: BG, color: INK, fontFamily: "'Tajawal',system-ui,sans-serif", minHeight: '100vh', overflowX: 'hidden', WebkitFontSmoothing: 'antialiased' }}>
@@ -74,6 +76,21 @@ export default function LandingPage() {
         .rfd-footer-link{font-size:14.5px;color:${MU};transition:color .2s;display:block;}
         .rfd-footer-link:hover{color:${INK};}
 
+        /* ── hamburger / mobile nav ── */
+        .rfd-burger{display:none;flex-direction:column;justify-content:center;gap:5px;width:40px;height:40px;padding:6px;background:none;border:1px solid ${LN};border-radius:10px;cursor:pointer;flex-shrink:0;}
+        .rfd-burger span{display:block;height:2px;border-radius:2px;background:${INK};transition:transform .25s,opacity .2s,width .2s;}
+        .rfd-nav-links-desktop{display:flex;align-items:center;gap:34px;font-size:16px;font-weight:500;}
+        .rfd-nav-cta-wrap{display:block;}
+        .rfd-mobile-menu{display:none;flex-direction:column;gap:4px;padding:12px 20px 16px;border-top:1px solid ${LN};background:rgba(246,248,253,0.97);}
+        .rfd-mobile-menu.open{display:flex;}
+        .rfd-mobile-link{font-size:17px;font-weight:600;color:${MU};padding:10px 0;border-bottom:1px solid ${LN};transition:color .2s;}
+        .rfd-mobile-link:hover{color:${INK};}
+
+        @media(max-width:768px){
+          .rfd-nav-links-desktop{display:none!important;}
+          .rfd-nav-cta-wrap{display:none!important;}
+          .rfd-burger{display:flex;}
+        }
         @media(max-width:900px){
           .rfd-hero-chips{display:none!important;}
           .rfd-features-grid{grid-template-columns:1fr 1fr!important;}
@@ -91,19 +108,59 @@ export default function LandingPage() {
 
       {/* ── NAV ── */}
       <nav style={{ position: 'sticky', top: 0, zIndex: 50, backdropFilter: 'blur(18px)', background: 'rgba(246,248,253,0.82)', borderBottom: `1px solid ${LN}` }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '18px 40px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 32 }}>
-          <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Top bar */}
+        <div style={{ maxWidth: 1200, margin: '0 auto', padding: '18px clamp(16px,4vw,40px)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+          {/* Logo */}
+          <a href="#" style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
             <span style={{ width: 30, height: 30, borderRadius: 9, background: `linear-gradient(140deg,${DK},${A})`, display: 'inline-block', transform: 'rotate(45deg)', boxShadow: `0 0 22px rgba(15,181,172,0.40)` }} />
             <span style={{ fontSize: 26, fontWeight: 900, letterSpacing: '-0.5px' }}>رافد</span>
           </a>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 34, fontSize: 16, fontWeight: 500 }}>
+
+          {/* Desktop links */}
+          <div className="rfd-nav-links-desktop">
             <a href="#features" className="rfd-nav-link">المنصة</a>
             <a href="#distributors" className="rfd-nav-link">الموزّعون</a>
             <a href="#dup" className="rfd-nav-link">الحماية من التكرار</a>
             <a href="/pricing" className="rfd-nav-link">الأسعار</a>
             <a href="#cta" className="rfd-nav-link">تواصل معنا</a>
           </div>
-          <a href="/login" className="rfd-nav-cta">سجّل دخولك</a>
+
+          {/* Desktop CTA */}
+          <div className="rfd-nav-cta-wrap">
+            <a href="/login" className="rfd-nav-cta">سجّل دخولك</a>
+          </div>
+
+          {/* Hamburger */}
+          <button
+            className="rfd-burger"
+            aria-label={menuOpen ? 'إغلاق القائمة' : 'فتح القائمة'}
+            onClick={() => setMenuOpen(o => !o)}
+          >
+            <span style={{ transform: menuOpen ? 'translateY(7px) rotate(45deg)' : 'none' }} />
+            <span style={{ opacity: menuOpen ? 0 : 1 }} />
+            <span style={{ transform: menuOpen ? 'translateY(-7px) rotate(-45deg)' : 'none' }} />
+          </button>
+        </div>
+
+        {/* Mobile drawer */}
+        <div className={`rfd-mobile-menu${menuOpen ? ' open' : ''}`}>
+          <a href="#features"     className="rfd-mobile-link" onClick={close}>المنصة</a>
+          <a href="#distributors" className="rfd-mobile-link" onClick={close}>الموزّعون</a>
+          <a href="#dup"          className="rfd-mobile-link" onClick={close}>الحماية من التكرار</a>
+          <a href="/pricing"      className="rfd-mobile-link" onClick={close}>الأسعار</a>
+          <a href="#cta"          className="rfd-mobile-link" onClick={close}>تواصل معنا</a>
+          <a
+            href="/login"
+            onClick={close}
+            style={{
+              marginTop: 8, display: 'block', textAlign: 'center',
+              background: DK, color: '#fff',
+              fontWeight: 800, fontSize: 15,
+              padding: '12px 20px', borderRadius: 11,
+            }}
+          >
+            سجّل دخولك
+          </a>
         </div>
       </nav>
 
