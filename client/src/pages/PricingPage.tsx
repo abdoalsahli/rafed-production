@@ -274,7 +274,7 @@ export default function PricingPage() {
                 {' '}<span style={{ fontSize: 15, fontWeight: 700, color: MU }}>بطاقة / سنوياً</span>
               </div>
             </div>
-            <a href="/login" className="rfd-btn-plain">ابدأ الآن</a>
+            <a href="https://wa.me/218944513974" target="_blank" rel="noopener noreferrer" className="rfd-btn-plain">ابدأ الآن</a>
             <div style={{ fontSize: 13.5, fontWeight: 800, color: MU2, marginBottom: 14 }}>كل ميزات المنصة، بلا استثناء:</div>
             <FeatureList />
           </div>
@@ -311,7 +311,7 @@ export default function PricingPage() {
                 {' '}<span style={{ fontSize: 15, fontWeight: 700, color: MU }}>بطاقة / سنوياً</span>
               </div>
             </div>
-            <a href="/login" className="rfd-btn-navy">ابدأ الآن</a>
+            <a href="https://wa.me/218944513974" target="_blank" rel="noopener noreferrer" className="rfd-btn-navy">ابدأ الآن</a>
             <div style={{ fontSize: 13.5, fontWeight: 800, color: MU2, marginBottom: 14 }}>كل ميزات المنصة، بلا استثناء:</div>
             <FeatureList featured />
           </div>
@@ -349,7 +349,7 @@ export default function PricingPage() {
                 <div style={{ fontSize: 13, fontWeight: 700, color: ACCENT, marginBottom: 6 }}>حد بيع البطاقات</div>
                 <div style={{ fontSize: 26, fontWeight: 900, letterSpacing: -0.8 }}>بلا حدود</div>
               </div>
-              <a href="/login" className="rfd-btn-accent">تواصل مع المبيعات</a>
+              <a href="https://wa.me/218944513974" target="_blank" rel="noopener noreferrer" className="rfd-btn-accent">تواصل مع المبيعات</a>
               <div style={{ fontSize: 13.5, fontWeight: 800, color: 'rgba(255,255,255,0.55)', marginBottom: 14 }}>
                 كل ميزات المنصة، بلا استثناء:
               </div>
@@ -440,7 +440,7 @@ export default function PricingPage() {
               أخبرنا بحجم شبكتك وسنقترح الخطة المناسبة — دون التزام.
             </p>
             <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <a href="/login" className="rfd-cta-navy">تواصل مع المبيعات</a>
+              <a href="https://wa.me/218944513974" target="_blank" rel="noopener noreferrer" className="rfd-cta-navy">تواصل مع المبيعات</a>
               <a href="/" className="rfd-cta-outline">شاهد المنصة</a>
             </div>
           </div>
