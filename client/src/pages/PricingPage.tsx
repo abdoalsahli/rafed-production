@@ -485,8 +485,18 @@ export default function PricingPage() {
         <div style={{
           borderTop: `1px solid ${LN}`, padding: '22px clamp(20px,4vw,40px)',
           maxWidth: 1200, margin: '0 auto', fontSize: 13, color: MU2,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          flexWrap: 'wrap', gap: 8,
         }}>
-          © 2026 رافد. جميع الحقوق محفوظة.
+          <span>© 2026 رافد. جميع الحقوق محفوظة.</span>
+          <a
+            href="tel:+218944513974"
+            style={{ color: MU2, fontWeight: 600, direction: 'ltr', transition: 'color .2s' }}
+            onMouseEnter={e => (e.currentTarget.style.color = INK)}
+            onMouseLeave={e => (e.currentTarget.style.color = MU2)}
+          >
+            094 451 3974
+          </a>
         </div>
       </footer>
     </div>
