@@ -5,6 +5,14 @@
  */
 import { useState } from 'react';
 
+const WA_BASE = 'https://wa.me/218944513974?text=';
+const WA = {
+  basic:      WA_BASE + encodeURIComponent('السلام عليكم،\nأنا مهتم بالاشتراك في الخطة الأساسية لمنصة رافد (4,000 د.ل / سنوياً — حتى 50,000 بطاقة).\nهل يمكنكم مساعدتي في البدء؟'),
+  pro:        WA_BASE + encodeURIComponent('السلام عليكم،\nأنا مهتم بالاشتراك في الخطة الاحترافية لمنصة رافد (6,000 د.ل / سنوياً — حتى 200,000 بطاقة).\nهل يمكنكم مساعدتي في البدء؟'),
+  enterprise: WA_BASE + encodeURIComponent('السلام عليكم،\nشبكتنا تتجاوز الخطط القياسية وأود الحصول على تسعير مخصّص لخطة المؤسسات الكبيرة في منصة رافد.\nهل يمكنكم التواصل معي؟'),
+  cta:        WA_BASE + encodeURIComponent('السلام عليكم،\nأود معرفة الخطة المناسبة لحجم شبكتي في منصة رافد.\nهل يمكنكم مساعدتي في الاختيار؟'),
+};
+
 const ACCENT  = '#0FB5AC';
 const NAVY    = '#00236F';
 const BG      = '#F6F8FD';
@@ -274,7 +282,7 @@ export default function PricingPage() {
                 {' '}<span style={{ fontSize: 15, fontWeight: 700, color: MU }}>بطاقة / سنوياً</span>
               </div>
             </div>
-            <a href="https://wa.me/218944513974" target="_blank" rel="noopener noreferrer" className="rfd-btn-plain">ابدأ الآن</a>
+            <a href={WA.basic} target="_blank" rel="noopener noreferrer" className="rfd-btn-plain">ابدأ الآن</a>
             <div style={{ fontSize: 13.5, fontWeight: 800, color: MU2, marginBottom: 14 }}>كل ميزات المنصة، بلا استثناء:</div>
             <FeatureList />
           </div>
@@ -311,7 +319,7 @@ export default function PricingPage() {
                 {' '}<span style={{ fontSize: 15, fontWeight: 700, color: MU }}>بطاقة / سنوياً</span>
               </div>
             </div>
-            <a href="https://wa.me/218944513974" target="_blank" rel="noopener noreferrer" className="rfd-btn-navy">ابدأ الآن</a>
+            <a href={WA.pro} target="_blank" rel="noopener noreferrer" className="rfd-btn-navy">ابدأ الآن</a>
             <div style={{ fontSize: 13.5, fontWeight: 800, color: MU2, marginBottom: 14 }}>كل ميزات المنصة، بلا استثناء:</div>
             <FeatureList featured />
           </div>
@@ -349,7 +357,7 @@ export default function PricingPage() {
                 <div style={{ fontSize: 13, fontWeight: 700, color: ACCENT, marginBottom: 6 }}>حد بيع البطاقات</div>
                 <div style={{ fontSize: 26, fontWeight: 900, letterSpacing: -0.8 }}>بلا حدود</div>
               </div>
-              <a href="https://wa.me/218944513974" target="_blank" rel="noopener noreferrer" className="rfd-btn-accent">تواصل مع المبيعات</a>
+              <a href={WA.enterprise} target="_blank" rel="noopener noreferrer" className="rfd-btn-accent">تواصل مع المبيعات</a>
               <div style={{ fontSize: 13.5, fontWeight: 800, color: 'rgba(255,255,255,0.55)', marginBottom: 14 }}>
                 كل ميزات المنصة، بلا استثناء:
               </div>
@@ -440,7 +448,7 @@ export default function PricingPage() {
               أخبرنا بحجم شبكتك وسنقترح الخطة المناسبة — دون التزام.
             </p>
             <div style={{ display: 'flex', gap: 14, justifyContent: 'center', flexWrap: 'wrap' }}>
-              <a href="https://wa.me/218944513974" target="_blank" rel="noopener noreferrer" className="rfd-cta-navy">تواصل مع المبيعات</a>
+              <a href={WA.cta} target="_blank" rel="noopener noreferrer" className="rfd-cta-navy">تواصل مع المبيعات</a>
               <a href="/" className="rfd-cta-outline">شاهد المنصة</a>
             </div>
           </div>
